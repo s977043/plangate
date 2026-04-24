@@ -2,13 +2,15 @@
 
 PlanGate の主要リリース履歴。
 
+このファイルは各リリース時点の内容を記録するものであり、この pull request の差分一覧ではない。
+
 ## v7.1.0 - 2026-04-23
 
 README 刷新、GitHub Pages 公開、Claude Code / Codex CLI 共用スキルの整備を行ったリリース。
 
 - README をハーネスエンジニアリング上の位置づけを軸に再構成
 - `docs/philosophy.md` を追加し、思想・問題設定・PlanGate の設計解釈を分離
-- GitHub Pages 用の `docs/index.md` と `docs/_config.yml` を追加
+- GitHub Pages 用の `docs/index.md` と `docs/_config.yml` を整備
 - MIT `LICENSE` を追加
 - `.agents/skills/` に Codex CLI / Claude Code 共用スキルを追加
 - GitHub Pages を `main` / `docs` で公開
