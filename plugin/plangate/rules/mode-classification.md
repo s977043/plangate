@@ -102,7 +102,7 @@
 | Gate | ultra-light | light | standard | high-risk | critical |
 |------|------------|-------|----------|-----------|----------|
 | **Design Gate** | - | - | - | ○ | ○ |
-| **TDD Gate** | - | △ | △ | ○ | ○ |
+| **TDD Gate** | - | - | △ | ○ | ○ |
 | **Review Gate** | - | - | △（/pg-check 推奨） | ○ | ○ |
 | **Completion Gate** | - | △ | ○ | ○ | ○ |
 
