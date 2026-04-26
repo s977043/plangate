@@ -15,14 +15,13 @@ Unlike agent frameworks that focus on autonomy, PlanGate focuses on **approval b
 
 ## Install
 
-### Option A: Clone and symlink (recommended)
+### Option A: Clone and register plugin (recommended)
 
 ```bash
 git clone https://github.com/s977043/plangate.git
-cd plangate
 ```
 
-Then follow [Claude Code plugin registration instructions](plugin/plangate/README.md) or copy `.claude/` into your project.
+Then follow [Claude Code plugin registration instructions](plugin/plangate/README.md) to register the plugin.
 
 ### Option B: Copy `.claude/` directly
 
@@ -131,8 +130,8 @@ See `examples/sample-task/` for a complete worked example of all artifact files.
 | **Customization** | Project `.claude/` overrides plugin | Edit directly |
 | **Conflict risk** | Low (namespaced skills/commands) | None |
 
-Both can technically coexist. Plugin provides the base, project `.claude/` overrides.
-See [plugin/plangate/README.md](plugin/plangate/README.md) for registration instructions.
+Choose **one** method per project. If you need to customize skills or commands beyond what the plugin offers, use Option B and edit `.claude/` directly.
+See [plugin/plangate/README.md](plugin/plangate/README.md) for plugin registration instructions.
 
 ## Repository Layout
 
