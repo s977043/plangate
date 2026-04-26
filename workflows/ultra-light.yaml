@@ -7,4 +7,4 @@ phases:
     produces: [code]
     agent: implementation-agent
 
-gates: []
+gate_enforcement: {}

@@ -13,7 +13,7 @@ fail=0
 assert_pass() {
   label=$1
   shift
-  if "$@" >/dev/null 2>&1; then
+  if "$@" >/dev/null; then
     printf '[PASS] %s\n' "$label"
     pass=$((pass + 1))
   else
@@ -25,7 +25,7 @@ assert_pass() {
 assert_fail() {
   label=$1
   shift
-  if ! "$@" >/dev/null 2>&1; then
+  if ! "$@" >/dev/null; then
     printf '[PASS] %s\n' "$label"
     pass=$((pass + 1))
   else
