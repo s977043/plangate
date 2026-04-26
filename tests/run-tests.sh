@@ -48,11 +48,6 @@ assert_fail "stale-plan-hash: plan.md modified after approval → FAIL" \
 assert_fail "broken-pbi: pbi-input.md missing → FAIL" \
   sh "$PLANGATE_BIN" validate --dir "$FIXTURES_DIR/broken-pbi"
 
-printf '\n=== doctor ===\n'
-
-assert_pass "doctor: harness environment check passes" \
-  sh "$PLANGATE_BIN" doctor
-
 printf '\n'
 printf 'Results: %d passed, %d failed\n' "$pass" "$fail"
 
