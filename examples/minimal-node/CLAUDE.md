@@ -19,7 +19,7 @@ English  <!-- or: Japanese -->
 
 ## Project Rules
 
-See [docs/ai/project-rules.md](docs/ai/project-rules.md) for shared AI operating rules.
+See [.claude/rules/](.claude/rules/) for shared AI operating rules.
 
 ## Key Directories
 
