@@ -423,8 +423,10 @@ cmd_abort() {
   run_log="$work_dir/run.ndjson"
   ts=$(plangate_now)
 
+  # JSON-escape the reason: backslash and double-quote must be escaped
+  escaped_reason=$(printf '%s' "$reason" | sed 's/\\/\\\\/g; s/"/\\"/g')
   plangate_append_ndjson "$run_log" \
-    "{\"ts\":\"$ts\",\"task_id\":\"$task_id\",\"phase\":\"D\",\"event\":\"session_ended\",\"detail\":\"aborted: $reason\"}"
+    "{\"ts\":\"$ts\",\"task_id\":\"$task_id\",\"phase\":\"D\",\"event\":\"session_ended\",\"detail\":\"aborted: $escaped_reason\"}"
 
   printf 'Abort recorded in: %s\n' "$run_log"
   printf 'Reason: %s\n' "$reason"
