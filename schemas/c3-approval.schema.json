@@ -41,11 +41,25 @@
       "description": "Required when c3_status is REJECTED"
     }
   },
-  "if": {
-    "properties": { "c3_status": { "const": "CONDITIONAL" } }
-  },
-  "then": {
-    "required": ["conditions"]
-  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "c3_status": { "const": "CONDITIONAL" } },
+        "required": ["c3_status"]
+      },
+      "then": {
+        "required": ["conditions"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "c3_status": { "const": "REJECTED" } },
+        "required": ["c3_status"]
+      },
+      "then": {
+        "required": ["rejection_reason"]
+      }
+    }
+  ],
   "additionalProperties": false
 }
