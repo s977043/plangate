@@ -49,7 +49,7 @@ schema_version: 1
 
 ## 👤 Humanタスク
 
-- [ ] H-01: **C-3ゲート** — `docs/working/TASK-XXXX/plan.md` を読み、APPROVE / CONDITIONAL / REJECT を判断（exec開始前に必須）(human)
+- [ ] H-01: **C-3ゲート** — `examples/sample-task/plan.md` を読み、APPROVE / CONDITIONAL / REJECT を判断（exec開始前に必須）(human)
   - depends_on: plan.md, todo.md, test-cases.md, review-self.md 生成完了
 - [ ] H-02: **C-4ゲート** — GitHub PR をレビュー・マージ（完了後）(human)
   - depends_on: PR作成完了
