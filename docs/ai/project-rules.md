@@ -71,8 +71,10 @@ PlanGate — ゲート型AI駆動開発ワークフローのリポジトリ。
 | PlanGate ワークフロー（v5 現行） | `docs/plangate.md` |
 | PlanGate v6 ロードマップ | `docs/plangate-v6-roadmap.md` |
 | **PlanGate v7 ハイブリッドアーキテクチャ** | `docs/plangate-v7-hybrid.md` |
+| **Orchestrator Mode（親 PBI 分解、v8.2、Spec only）** | `docs/orchestrator-mode.md` |
+| Orchestrator Mode Gate 条件（正本） | `.claude/rules/orchestrator-mode.md` |
 | v7 Rule 1〜5 + 境界ルール | `.claude/rules/hybrid-architecture.md` |
-| v7 Workflow 定義（WF-01〜WF-05） | `docs/workflows/README.md` |
+| v7 Workflow 定義（WF-01〜WF-05 + Orchestrator） | `docs/workflows/README.md` |
 | ワークフロー詳細・プロンプト集 | `docs/ai-driven-development.md` |
 | AIツール役割分担 | `docs/ai/tool-roles.md` |
 | レビュー原則 | `.claude/rules/review-principles.md` |
