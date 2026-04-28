@@ -203,13 +203,20 @@ PR Decision（APPROVE / BLOCK / CONDITIONAL）
 
 ### Mode × Gate × Skill 対応表
 
-| Mode | 発火する Gate | 必須 Skill |
-|------|-------------|-----------|
-| ultra-light | なし | — |
-| light | なし | — |
-| standard | Completion Gate | context-packager |
-| high-risk | Design + TDD + Review + Completion Gate | intent-classifier, skill-policy-router, context-packager, subagent-dispatch |
-| critical | 全 Gate（人間承認 + Rollback Plan 必須） | 全 Skill + pr-decision |
+正本: `plugin/plangate/skills/skill-policy-router/SKILL.md`、`plugin/plangate/rules/mode-classification.md`
+
+| Mode | 必須 Skill | 任意 Skill | Gate / 要件 |
+|------|-----------|-----------|-------------|
+| `ultra-light` | `verify` | `check` | 完了前の最小確認。user approval / worktree / TDD は不要 |
+| `light` | `check`, `verify` | `think`, `hunt` | 軽量レビュー + 完了確認。user approval / worktree / TDD は不要 |
+| `standard` | `think`, `check`, `verify` | `hunt`, `tdd` | Evidence Ledger 必須。user approval と TDD は推奨または条件付き |
+| `high-risk` | `think`, `approval`, `worktree`, `tdd`, `check`, `review`, `verify` | — | Design / TDD / Review / Completion Gate、人間承認、worktree、証拠が必須 |
+| `critical` | `think`, `approval`, `worktree`, `tdd`, `review`, `verify` | — | 全 Gate、人間の明示承認、rollback plan、security review、証拠が必須 |
+
+### v8.0 / v8.1 との接続
+
+v8.0 以降は、上記の5モードが `workflows/<mode>.yaml` として Workflow DSL 化されている。
+v8.1.0 以降、`bin/plangate validate --mode <mode>` は `gate_enforcement.c3.required_artifacts` を DSL から読み取り、mode 別に必要成果物を検証する。
 
 ## 参照
 
