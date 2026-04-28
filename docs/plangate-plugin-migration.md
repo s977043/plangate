@@ -1,7 +1,7 @@
 # PlanGate Claude Code Plugin 移行ガイド
 
-> 最終更新: 2026-04-27
-> 対象バージョン: plugin 0.5.0
+> 最終更新: 2026-04-28
+> 対象バージョン: plugin 0.5.0 / CLI v8.1.0
 
 ## 背景・目的
 
@@ -23,6 +23,8 @@ PlanGate は当初、`.claude/` ディレクトリを含むリポジトリ配布
 - 明示的に plugin 側を呼ぶ場合: `plangate:<skill/agent>` prefix を使用
 
 このため、**既存利用者は急いで移行する必要はありません**。plugin の安定性を確認してから段階的に移行できます。
+
+新規導入では、plugin 方式と `.claude/` 直接コピー方式のどちらか一方を選ぶことを推奨します。デュアル運用は移行・高度なカスタマイズ用途では有効ですが、同名 command / skill の解決順を意識してください。
 
 ## 同梱範囲（plugin 0.5.0）
 
@@ -68,7 +70,7 @@ PlanGate は当初、`.claude/` ディレクトリを含むリポジトリ配布
 | `acceptance-tester` | V-1 受入検査 |
 | `code-optimizer` | V-2 コード最適化 |
 
-### Rules (8)
+### Rules (9)
 
 | Rule | 内容 |
 |------|------|
@@ -80,7 +82,7 @@ PlanGate は当初、`.claude/` ディレクトリを含むリポジトリ配布
 | `review-gate.md` | 6 観点レビュー・critical finding ブロック条件 |
 | `completion-gate.md` | 全 Gate 通過を一元管理する 5 条件チェックポイント |
 | `subagent-roles.md` | 6 ロール定義（planner/implementer/reviewer 等） |
-| `worktree-policy.md` | high-risk: 必須（推奨）、critical: 必須（強制）|
+| `worktree-policy.md` | high-risk: 必須（推奨）、critical: 必須（強制） |
 
 ## 対象外の理由
 
@@ -134,12 +136,21 @@ plugin 内 agents から rules を参照する場合、plugin ルート相対パ
 
 ### Skills
 
-```
+```text
 plangate:brainstorming
 plangate:self-review
 plangate:subagent-driven-development
 plangate:systematic-debugging
 plangate:codex-multi-agent
+plangate:setup-team
+plangate:intent-classifier
+plangate:skill-policy-router
+plangate:evidence-ledger
+plangate:design-gate
+plangate:review-gate
+plangate:context-packager
+plangate:subagent-dispatch
+plangate:pr-decision
 ```
 
 ### Agents
@@ -153,6 +164,20 @@ Task(subagent_type="plangate:spec-writer", ...)
 ### Commands
 
 Commands は `/command-name` 形式でそのまま呼び出し可能。解決順（plugin vs legacy）は Claude Code 内部仕様に従う。
+
+## CLI Provider Integration（v8.1.0）
+
+`bin/plangate` 側では、pluginとは別に provider CLI 連携も実装されています。
+
+```bash
+bin/plangate validate TASK-XXXX --mode high-risk
+PLANGATE_EXTERNAL_REVIEWER=gemini bin/plangate review TASK-XXXX --phase c2
+PLANGATE_IMPL_AGENT=opencode bin/plangate exec TASK-XXXX --mode standard
+```
+
+- `validate --mode` は `workflows/<mode>.yaml` の `gate_enforcement.c3.required_artifacts` を読み込みます。
+- `review` は `PLANGATE_EXTERNAL_REVIEWER=gemini` で Gemini CLI を外部レビューに使えます。
+- `exec` は C-3 gate を検証し、`PLANGATE_IMPL_AGENT=opencode` で OpenCode を実装エージェントとして呼び出せます。
 
 ## 既存利用者向け段階的移行手順
 
@@ -192,12 +217,12 @@ plugin の安定性を十分確認後、以下を段階的に実施:
 - [x] plugin 利用例の collection（`examples/` に追加）
 - [x] 多言語化（`README.md` 日本語化、英語版を `README_en.md` として分離）
 - [x] CLI テストスイート（`tests/run-tests.sh`）と CI workflow
+- [x] Provider CLI 統合（Gemini CLI review / OpenCode exec）
 
 ### 短期（〜3 ヶ月）
 
 - [ ] Hooks の実装本体（deterministic hooks: lint 自動実行、C-1 トリガー等）
-- [ ] Workflow DSL (YAML) を実行層に接続（現在はドキュメント定義のみ）
-- [ ] Provider RFC を実装（Gemini CLI / OpenCode 統合）
+- [ ] Workflow DSL (YAML) を実行層に接続（現在はドキュメント定義 + CLI validate --mode 連携）
 
 ### 長期（6 ヶ月〜）
 
