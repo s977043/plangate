@@ -68,7 +68,7 @@ check "TC-08: dependency-graph template uses mermaid graph" \
   "test -f docs/working/templates/dependency-graph.md && grep -qE 'mermaid|graph TD|flowchart' docs/working/templates/dependency-graph.md"
 
 check "TC-09: parallelization-plan template has both sections" \
-  "test -f docs/working/templates/parallelization-plan.md && grep -q '並行実行可能\\|並行可能\\|並行可' docs/working/templates/parallelization-plan.md && grep -q '並行実行不可\\|並行不可' docs/working/templates/parallelization-plan.md"
+  "test -f docs/working/templates/parallelization-plan.md && grep -q '並行実行可能' docs/working/templates/parallelization-plan.md && grep -q '並行実行不可' docs/working/templates/parallelization-plan.md"
 
 check "TC-10: integration-plan template has integration-check and completion sections" \
   "test -f docs/working/templates/integration-plan.md && grep -q '統合チェック' docs/working/templates/integration-plan.md && grep -q '完了条件' docs/working/templates/integration-plan.md"
@@ -87,8 +87,8 @@ check "TC-12: branch naming convention is documented" \
 # TC-13: 並行条件
 # ----------------------------------------------------------------
 
-check "TC-13: parallelization conditions enumerated (>= 4 + >= 4)" \
-  "grep -cE '^[[:space:]]*[0-9]+\\.|^[[:space:]]*-' docs/orchestrator-mode.md | awk '\$1 >= 8 { exit 0 } { exit 1 }'"
+check "TC-13: parallelization conditions enumerated (>= 4 ok / >= 4 ng) within their sections" \
+  "test \$(awk '/### 並行実行可能な条件/,/### 並行実行不可の条件/' docs/orchestrator-mode.md | grep -cE '^[[:space:]]*[0-9]+\\.') -ge 4 && test \$(awk '/### 並行実行不可の条件/,/## モード分類との統合/' docs/orchestrator-mode.md | grep -cE '^[[:space:]]*[0-9]+\\.') -ge 4"
 
 # ----------------------------------------------------------------
 # TC-14 〜 TC-17: Gate 不変条件

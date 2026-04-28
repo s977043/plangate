@@ -14,7 +14,7 @@
 
 - 親 PBI の `parent-plan.md`
 - 子 PBI 群の YAML（`children/PBI-XXX-NN.yaml`）すべて
-- 各子 PBI の handoff.md（または equivalent）
+- 各子 PBI の handoff.md（必須、`docs/working/<child-context>/handoff.md`）
 - `integration-plan.md` のチェックリスト
 
 ## 完了条件（ParentDone 不変条件）
