@@ -233,4 +233,4 @@ To contribute support for a new provider, see [CONTRIBUTING.md](CONTRIBUTING.md#
 
 ## License
 
-MIT — see [LICENSE]
+MIT — see [LICENSE](LICENSE)
