@@ -28,6 +28,7 @@
 ### Gap 検出時の対応
 
 `parent-AC-4` のような gap が検出された場合:
+
 - 既存子 PBI の AC を拡張する（軽微な場合）
 - 新規子 PBI を提案する（`new_child_pbi_proposed` フロー）
 - 親 PBI 自体のスコープ縮小を検討する（人間判断）

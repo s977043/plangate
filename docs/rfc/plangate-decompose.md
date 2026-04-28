@@ -106,32 +106,38 @@ Run without --dry-run to write files (after review).
 ### 案 A: ローカル決定論（recommended for v2）
 
 **特徴**:
+
 - POSIX sh + python3（YAML 検証用）のみ
 - LLM 呼び出しなし
 - `--mode manual` と `--mode assisted` まで対応
 - CI で再現可能、テスト容易
 
 **Pros**:
+
 - 既存 `bin/plangate` と同じ依存範囲
 - 動作が予測可能
 - ネットワーク不要
 
 **Cons**:
+
 - 提案の質はヒューリスティック止まり
 - ドメイン的な妥当性は人間判断が必須
 
 ### 案 B: 外部 LLM 補助（recommended for v3）
 
 **特徴**:
+
 - `--mode auto` を担当
 - 既存 `bin/plangate review` の provider abstraction を踏襲
 - LLM 出力 → schema validation → 人間レビュー必須
 
 **Pros**:
+
 - 提案品質の上限が高い
 - 大規模 PBI で人間の認知負荷が下がる
 
 **Cons**:
+
 - LLM 依存、再現性が低い
 - コスト発生（API 課金）
 - セキュリティレビュー必須（コードベース全体を渡すため）

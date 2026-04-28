@@ -174,6 +174,7 @@ blocked → 任意の前状態 (with re-approval if needed)
 ## バージョニング
 
 本ルール v1 は **仕様定義のみ**。実装層での強制力導入時に v2 として扱い、その時点で:
+
 - 機械チェック実装（CLI / Hook）
 - 失敗時のメッセージフォーマット
 - bypass 条件（緊急時のみの override mechanism）

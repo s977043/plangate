@@ -34,9 +34,11 @@
 ## Constraints / Non-goals
 
 ### Constraints
+
 - （技術的制約 / プロセス制約）
 
 ### Non-goals
+
 - （明示的にこの親 PBI で扱わないもの）
 
 ## Approach Overview

@@ -175,20 +175,24 @@ Layer 5: Rule 正本（.claude/rules/orchestrator-mode.md）+ RFC（docs/rfc/pla
 実装ではないため **テストはドキュメント整合性検証** に限定する。
 
 ### Unit（ドキュメント単体）
+
 - 新規 9 ファイルが指定パスに存在する（`test -f`）
 - 各ファイルに必須セクションが含まれる（`grep -q "## <section>"`）
 - YAML スキーマが yaml-lint に通る（`python3 -c "import yaml; yaml.safe_load(open('docs/schemas/child-pbi.yaml'))"`）
 
 ### Integration（ドキュメント間）
+
 - アーキテクチャ正本から 8 ファイルすべてへ相対リンクが張られている
 - 4 テンプレートの用語が `docs/orchestrator-mode.md` の用語と一致する
 - 状態名（parent:draft, child:planned 等）が全文書で表記揺れなく使われている
 
 ### Acceptance（受入基準突合）
+
 - 9 受入基準（AC-1〜AC-9）それぞれに対応する文書セクションが存在する
 - AC ↔ 文書セクション対応表が `test-cases.md` で網羅されている
 
 ### Verification Automation
+
 - `sh scripts/check-orchestrator-docs.sh`（簡易 shell スクリプト、本 PBI で同梱）で「全 9 ファイル存在 + 必須セクション grep」を一括実行
 - CI への組み込みは別 PBI に委譲
 

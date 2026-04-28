@@ -93,6 +93,7 @@ Phase A 末尾（C-3 ゲート）、各 B-N 末尾（🚩 必須確認）、Phas
 **判定**: PASS
 
 todo.md「Iron Law」セクションで Phase A 〜 D 各 phase の不可侵ルールを明記:
+
 - A: `NO EXECUTION WITHOUT REVIEWED PLAN FIRST`
 - B: `NO SCOPE CHANGE WITHOUT USER APPROVAL`
 - C: `NO MERGE WITHOUT VERIFICATION PASSED`
@@ -135,7 +136,7 @@ WARN / FAIL なし。C-3 ゲート提出可。
 | ID | 種別 | 内容 |
 |----|------|------|
 | N-1 | Note | 既存 v7 hybrid 5 Agent との責務境界（Step 1 / TC-02）が exec phase 最大の難所。本 PBI 範囲では「責務境界表」を作成するが、実装での agent 重複は別 PBI で再評価が必要 |
-| N-2 | Note | Issue #109 受入基準の「`plangate decompose ` が仕様化されている」の `<引数>` 部分が原文で省略されており、RFC で `plangate decompose <PBI-id>` として推測 |
+| N-2 | Note | Issue #109 受入基準の「`plangate decompose` が仕様化されている」の `<引数>` 部分が原文で省略されており、RFC で `plangate decompose <PBI-id>` として推測 |
 | N-3 | Note | TC-19 の用語統一チェックは grep ベースのため、構造的逸脱（例: 同義語使用）は検出できない。EC-03 で人間レビュー併用 |
 | N-4 | Risk | RFC を Draft で確定すると、後続実装 PBI で仕様が変わる可能性あり。本 PBI handoff.md の「V2 候補」で明記する |
 
@@ -150,6 +151,7 @@ WARN / FAIL なし。C-3 ゲート提出可。
 5. **モード判定（high-risk）は妥当か** → ✅ 変更ファイル数 13 + アーキ仕様策定で high-risk 適合（実装なしのため検証コストは軽め）
 
 C-3 三値判断の推奨:
+
 - **APPROVE**: 上記 5 点に異論なしの場合 → exec へ進む
 - **CONDITIONAL**: スコープ縮小（例: RFC を別 PBI に切り出す）等の修正指示あり → plan.md 修正後 C-1 簡易再実行
 - **REJECT**: 仕様策定アプローチ自体の変更要求あり → pbi-input.md 再設計

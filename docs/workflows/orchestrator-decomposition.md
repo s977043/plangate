@@ -82,22 +82,23 @@ parent:decomposition_approved
 ### Step D-1: 親 PBI 分析
 
 | 項目 | 内容 |
-|------|------|
+| --- | --- |
 | 入力 | `pbi-input.md` / 既存コードベース |
-| 出力 | `parent-plan.md`（暫定版、Goal / Constraints / Approach Overview のみ）|
+| 出力 | `parent-plan.md`（暫定版、Goal / Constraints / Approach Overview のみ） |
 | Sub Agent | Parent Supervisor（兼 requirements-analyst） |
 | Skill | `requirement-gap-scan` / `context-load` |
 
 ### Step D-2: 子 PBI 候補抽出
 
 | 項目 | 内容 |
-|------|------|
+| --- | --- |
 | 入力 | Step D-1 の暫定 plan |
-| 出力 | 候補リスト（タイトル / ゴール / 想定 in_scope の 3 列）|
+| 出力 | 候補リスト（タイトル / ゴール / 想定 in_scope の 3 列） |
 | Sub Agent | Parent Supervisor |
-| Skill | `architecture-sketch`（既存）|
+| Skill | `architecture-sketch`（既存） |
 
 候補抽出の観点:
+
 - ドメイン境界（DDD の Bounded Context 単位）
 - レイヤー境界（domain / application / infrastructure / presentation）
 - 副作用境界（pure / side-effecting / external integration）
@@ -106,7 +107,7 @@ parent:decomposition_approved
 ### Step D-3: 子 PBI 仕様化
 
 | 項目 | 内容 |
-|------|------|
+| --- | --- |
 | 入力 | 候補リスト |
 | 出力 | `children/PBI-XXX-NN.yaml` × N |
 | Sub Agent | Child Planner（既存 solution-architect 拡張） |
@@ -117,9 +118,9 @@ parent:decomposition_approved
 ### Step D-4: 依存関係グラフ生成
 
 | 項目 | 内容 |
-|------|------|
+| --- | --- |
 | 入力 | 各子 PBI の `dependencies` フィールド |
-| 出力 | `dependency-graph.md`（mermaid graph）|
+| 出力 | `dependency-graph.md`（mermaid graph） |
 | Sub Agent | Parent Supervisor |
 | Skill | （新規）`dependency-graph-build` または手動 |
 
@@ -128,7 +129,7 @@ parent:decomposition_approved
 ### Step D-5: 並行実行可否判定
 
 | 項目 | 内容 |
-|------|------|
+| --- | --- |
 | 入力 | 子 PBI YAML 群 + dependency-graph |
 | 出力 | `parallelization-plan.md` |
 | Sub Agent | Parent Supervisor |
@@ -139,22 +140,23 @@ parent:decomposition_approved
 ### Step D-6: リスク集約
 
 | 項目 | 内容 |
-|------|------|
+| --- | --- |
 | 入力 | 各子 PBI の `risk` フィールド + 親 PBI 全体観 |
 | 出力 | `risk-report.md` |
 | Sub Agent | Parent Supervisor + Review Agent |
-| Skill | `risk-assessment`（既存）|
+| Skill | `risk-assessment`（既存） |
 
 ### Step D-7: 親計画ゲート（C-3 相当）
 
 | 項目 | 内容 |
-|------|------|
+| --- | --- |
 | 入力 | parent-plan / dependency-graph / parallelization / children / risk-report |
 | 出力 | `approvals/parent-c3.json` |
 | 担当 | 👤 人間 |
 | 判定値 | APPROVE / CONDITIONAL / REJECT |
 
 判定後の遷移:
+
 - **APPROVE**: `parent:decomposition_approved` へ → 子 PBI planning フェーズに進む
 - **CONDITIONAL**: 指摘内容を Step D-3 / D-4 / D-5 にフィードバックし簡易再生成
 - **REJECT**: Step D-1 から再実施
@@ -162,21 +164,22 @@ parent:decomposition_approved
 ## 既存 PlanGate Gate との対応
 
 | 既存 PlanGate Phase | Orchestrator Decomposition の対応 |
-|--------------------|--------------------------------|
+| --- | --- |
 | A: PBI INPUT PACKAGE | 親 PBI の pbi-input.md と同等 |
 | B: plan / todo / test-cases 生成 | Step D-1 〜 D-3 の親 + 子レベルで二重実行 |
-| C-1: セルフレビュー | 各子 PBI YAML に対して実施（C-1 簡易）|
-| **C-3: 人間レビュー** | **Step D-7 親計画ゲート**（親 PBI 全体）|
+| C-1: セルフレビュー | 各子 PBI YAML に対して実施（C-1 簡易） |
+| **C-3: 人間レビュー** | **Step D-7 親計画ゲート**（親 PBI 全体） |
 | 子 PBI 単位の C-3 | 子 PBI 各々の plan 生成後に通常通り実施 |
 
 つまり Orchestrator Mode では C-3 ゲートが **2 段階** になる:
+
 1. **親計画ゲート**（Step D-7）: 子 PBI 群と分解戦略全体を承認
 2. **子 PBI ゲート**: 各子 PBI の plan を個別承認
 
 ## 呼び出す Skill
 
 | Skill | 使用 Step | 出典 |
-|-------|----------|------|
+| --- | --- | --- |
 | `context-load` | D-1 | 既存 `.claude/skills/` |
 | `requirement-gap-scan` | D-1 | 既存 |
 | `architecture-sketch` | D-2, D-3 | 既存 |
@@ -187,10 +190,10 @@ parent:decomposition_approved
 ## エラーハンドリング
 
 | 異常 | 対処 |
-|------|------|
+| --- | --- |
 | 循環依存検出 | Step D-3 に戻り、子 PBI 分割を再検討 |
 | schema validation 失敗 | 該当子 PBI YAML を修正し Step D-3 末尾から再開 |
-| 並行不可判定の連鎖（実質直列のみ）| 親 PBI が大きすぎる可能性。親 PBI 分割を検討（人間判断）|
+| 並行不可判定の連鎖（実質直列のみ） | 親 PBI が大きすぎる可能性。親 PBI 分割を検討（人間判断） |
 | 親計画ゲート REJECT | Step D-1 から再実施 |
 
 ## 実装フェーズ提案（後続 PBI で）

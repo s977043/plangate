@@ -110,6 +110,7 @@ child_pbi:
 #### 4. 依存関係・並行開発判定
 
 並行実行可能な条件:
+
 - 変更ファイルが重ならない
 - 依存関係がない、または依存先が完了済み
 - API contract / DB schema / 共通型が固定済み
@@ -117,6 +118,7 @@ child_pbi:
 - 高リスク領域ではない
 
 並行実行不可の条件:
+
 - 同一ファイルを複数子 PBI が変更する
 - DB migration の順序依存がある
 - 認証・認可・決済・セキュリティ領域である
@@ -154,6 +156,7 @@ child:planned
 #### 7. 不変条件（Gate 条件の形式化）
 
 実行許可条件:
+
 ```text
 ChildExecAllowed =
   ChildPlanApproved
@@ -164,6 +167,7 @@ ChildExecAllowed =
 ```
 
 親 PBI 完了条件:
+
 ```text
 ParentDone =
   AllRequiredChildrenAccepted
@@ -174,6 +178,7 @@ ParentDone =
 ```
 
 新規子 PBI 作成条件:
+
 ```text
 NewChildPBIAllowed =
   GapDetected
@@ -223,17 +228,20 @@ NewChildPBIAllowed =
 ## Estimation Evidence
 
 ### Risks
+
 - **R1**: 既存 v7 hybrid architecture（5 Agent / 5 phase）との責務境界が不明瞭になり、Agent が重複定義される
 - **R2**: 子 PBI YAML スキーマが既存 plan.md / todo.md / test-cases.md と機能重複する
 - **R3**: 「Gate を消さない」原則と「並行実行で速度を出す」要求が衝突する可能性
 - **R4**: 仕様書間の参照不整合（`docs/orchestrator-mode.md` / `.claude/rules/orchestrator-mode.md` / `docs/schemas/child-pbi.yaml` 等）が発生しやすい
 
 ### Unknowns
+
 - **U1**: 親 PBI / 子 PBI の関係を Issue 上で表現する際、GitHub Issue の sub-issue 機能を活用するか、ラベル + 命名規則のみで管理するか
 - **U2**: 並列実行時の Evidence Ledger（plugin v7.2 で導入）がどう束ねられるか
 - **U3**: `plangate decompose` がローカル CLI で完結するか、外部 LLM 呼び出しを含むか
 
 ### Assumptions
+
 - **A1**: 本 PBI のスコープは「仕様文書 + スキーマ + RFC のみ」であり、CLI / Agent / Hook の実装は含まない
 - **A2**: 既存 5 mode（ultra-light 〜 critical）と orchestrator mode は **直交**する軸として設計可能
 - **A3**: 親 PBI / 子 PBI の状態管理は既存の `docs/working/` 配下に収まる（新たな永続層は不要）

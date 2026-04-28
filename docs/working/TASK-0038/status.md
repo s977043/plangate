@@ -41,6 +41,7 @@
 | C-1 セルフレビュー | `review-self.md` | ✅ 17 項目全 PASS |
 
 C-1 セルフレビュー結果サマリ:
+
 - Plan 7 項目: 全 PASS
 - ToDo 5 項目: 全 PASS
 - TestCases 3 項目: 全 PASS
@@ -147,7 +148,7 @@ todo.md の B-1 から B-10 まで順次実行し、
 - `docs/working/TASK-0038/todo.md`
 - `docs/working/TASK-0038/test-cases.md`
 - `docs/working/TASK-0038/review-self.md`
-- Issue #109: https://github.com/s977043/plangate/issues/109
-- 親 Epic #72: https://github.com/s977043/plangate/issues/72
+- Issue #109: <https://github.com/s977043/plangate/issues/109>
+- 親 Epic #72: <https://github.com/s977043/plangate/issues/72>
 - v7 hybrid: `docs/plangate-v7-hybrid.md`
 - mode 分類: `.claude/rules/mode-classification.md`
