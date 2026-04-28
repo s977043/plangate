@@ -6,7 +6,7 @@ PlanGate の主要リリース履歴。
 
 ## v8.2.0 - 2026-04-28
 
-feat: Parent-Child PBI Orchestrator Mode 仕様策定 + ドキュメント同期 (#111 #112 #114)
+feat: Parent-Child PBI Orchestrator Mode 仕様策定 + ドキュメント同期 (#111 #112 #113 #114)
 
 ### Added
 

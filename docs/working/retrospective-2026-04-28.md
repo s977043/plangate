@@ -154,5 +154,5 @@ Gemini Code Assist が自動でレビューコメントを残し、すべて res
 - PR #114: <https://github.com/s977043/plangate/pull/114>
 - Issue #109: <https://github.com/s977043/plangate/issues/109>
 - Issue #111: <https://github.com/s977043/plangate/issues/111>
-- TASK-0038 handoff: `docs/working/TASK-0038/handoff.md`
-- 前セッション: `docs/working/retrospective-2026-04-27.md`
+- TASK-0038 handoff: [docs/working/TASK-0038/handoff.md](TASK-0038/handoff.md)
+- 前セッション: [docs/working/retrospective-2026-04-27.md](retrospective-2026-04-27.md)
