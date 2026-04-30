@@ -16,7 +16,7 @@
 # 計画外 file 編集
 # plan.md の "Files / Components to Touch" セクションを正本とし、
 # git diff の対象ファイルが含まれているかを確認
-git diff --name-only main..HEAD | while read f; do
+git diff --name-only main...HEAD | while read f; do  # トリプルドット: 分岐点からの差分
   grep -q "$f" docs/working/TASK-XXXX/plan.md || echo "OUT-OF-SCOPE: $f"
 done
 

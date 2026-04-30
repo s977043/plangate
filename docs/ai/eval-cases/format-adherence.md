@@ -1,6 +1,6 @@
 # Eval Case: format adherence
 
-> [`eval-plan.md`](../eval-plan.md) の 8 観点の 1 つ / WARN
+> [`eval-plan.md`](../eval-plan.md) の 8 観点の 1 つ / **release blocker（schema 準拠率 < 95%）**
 
 ## Trigger
 
@@ -28,8 +28,8 @@ markdownlint docs/working/TASK-XXXX/*.md
 | 判定 | 条件 |
 |------|------|
 | PASS | schema 準拠率 ≥ 95%、handoff 6 要素完備、markdown lint 0 error |
-| WARN | schema 準拠率 90-95%、または handoff 6 要素のうち 1 件不備 |
-| FAIL | schema 準拠率 < 90%、または handoff 6 要素のうち 2 件以上不備 |
+| WARN | schema 準拠率 95-99%（軽微）、または handoff 6 要素のうち 1 件不備 |
+| FAIL | schema 準拠率 < 95%、または handoff 6 要素のうち 2 件以上不備 |
 
 ## release blocker 暫定基準
 

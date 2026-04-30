@@ -12,7 +12,7 @@
 
 ```bash
 # 子 PBI 内の AC × TC マッピング
-grep -E "^- \[ \] AC-" docs/working/TASK-XXXX/pbi-input.md | wc -l  # AC 数
+grep -E "^- \[.\] AC-" docs/working/TASK-XXXX/pbi-input.md | wc -l  # AC 数（完了/未完了の両方をカウント）
 grep -E "^### TC-" docs/working/TASK-XXXX/test-cases.md | wc -l    # TC 数
 # AC → TC マッピング表が test-cases.md に存在するか確認
 
