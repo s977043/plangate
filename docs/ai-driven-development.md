@@ -540,10 +540,10 @@ D: TDD実装 → L-0: リンター自動修正 → V-1: 受け入れ検査 → V
 | 用途 | パス |
 | --- | --- |
 | PlanGateガイド | `docs/plangate.md` |
-| v7 ハイブリッドアーキテクチャ | `docs/plangate-v7-hybrid.md` |
-| Orchestrator Mode（親 PBI 分解、v8.2） | `docs/orchestrator-mode.md` |
+| **PlanGate v7 ハイブリッドアーキテクチャ** | `docs/plangate-v7-hybrid.md` |
+| **Orchestrator Mode（親 PBI 分解、v8.2、Spec only）** | `docs/orchestrator-mode.md` |
 | Orchestrator Mode Gate 条件（正本） | `.claude/rules/orchestrator-mode.md` |
-| Workflow 定義（WF-01〜WF-05） | `docs/workflows/README.md` |
+| v7 Workflow 定義（WF-01〜WF-05 + Orchestrator） | `docs/workflows/README.md` |
 | メインコマンド | `.claude/commands/ai-dev-workflow.md` |
 | workflow-conductor | `.claude/agents/workflow-conductor.md` |
 | セルフレビュースキル | `.claude/skills/self-review/SKILL.md` |
