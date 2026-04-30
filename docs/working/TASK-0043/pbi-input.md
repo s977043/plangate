@@ -36,10 +36,14 @@
    | risk_mode_contract | mode 別の検証深度と Gate 要件 |
    | model_adapter | モデルごとの最小限の補正、verbosity、reasoning 方針 |
 
-3. **Phase contract の定義**（**7 phase 全件**、Phase 1 Core Contract との互換説明含む）
+3. **Phase contract の定義**（**7 phase 全件**、Phase 1 Core Contract / Phase 2 schema との互換説明含む）
 
    - classify / plan / approve-wait / execute / review / verify / handoff
    - **Core Contract v1 互換**: Phase 1 (`core-contract.md` § 3) の Success criteria 表は 6 phase で `review` に受入確認を包含。Prompt Assembly では `verify` を `review` から分離し独立 layer として明示化（C-2 EX-03-01 対応）。`prompt-assembly.md` で互換説明を記述する。
+   - **Phase 2 schema 互換（verbosity_by_phase）**: `schemas/model-profile.schema.json` の `verbosity_by_phase` は 5 phase（classify / plan / execute / review / handoff）のみ。Prompt Assembly が新設する 2 phase の verbosity 解決方針:
+     - **`approve-wait`**: ユーザー承認待ちで AI 出力なし → verbosity 不適用（解決スキップ）
+     - **`verify`**: `review` の verbosity を継承（review と verify はレビュー観点で連続するため）
+     - schema 変更は本 PBI scope 外、解決方針は `prompt-assembly.md` で明記（追加 Gemini 指摘対応）
 
 4. **Model adapter の定義**（**Phase 2 schema enum 全件 = 4 種、本 PBI 時点**）
 
