@@ -1,10 +1,20 @@
 # PlanGate Core Contract
 
 > **Outcome-first** な不変契約。Claude Code・Codex CLI・その他実行モデル全てが従う共通基盤。
-> 本ファイルが Iron Law / 制約 / 停止条件の **正本** であり、`CLAUDE.md` / `AGENTS.md` 等の入口ファイルから参照される。
+> 本ファイルが **実行契約（Iron Law / 制約 / 停止条件）の正本** であり、`CLAUDE.md` / `AGENTS.md` 等の入口ファイルから参照される。
 >
 > Status: v1（PBI-116-01 で初版確立）
 > 関連: [`docs/ai/project-rules.md`](./project-rules.md) / [`docs/ai-driven-development.md`](../ai-driven-development.md) / [PBI-116](../working/PBI-116/parent-plan.md)
+
+## 正本責務の境界（Codex 相談 CC-01 対応）
+
+| 正本ファイル | 責務 | 主な内容 |
+|-----------|------|---------|
+| **`docs/ai/core-contract.md`**（本ファイル） | **実行契約の正本** | Role / Goal / Success criteria / Iron Law / Decision rules / Stop rules / Output discipline |
+| **`docs/ai/project-rules.md`** | **プロジェクト共通ルールの正本** | リポジトリ目的 / ディレクトリ構造 / ブランチ命名 / 編集禁止ファイル / 参照先一覧 / **AI 運用 4 原則** |
+| `docs/ai-driven-development.md` | ワークフロー詳細・プロンプト集 | フェーズ遷移・コマンド・テンプレート（実行契約は本ファイルへ参照） |
+
+**優先順位**: 実行契約 = Core Contract / プロジェクトルール = project-rules / ワークフロー = ai-driven-development。重複した場合は **Core Contract が実行判断の最終根拠**。AI 運用 4 原則は project-rules 側を正本とし、Core Contract では併記参照する。
 
 ## 1. Role
 
@@ -44,12 +54,14 @@
 | 6 | **原因調査なしに修正しない** | systematic-debugging: NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST |
 | 7 | **2 段階レビューなしにマージしない** | subagent-driven-development: NO MERGE WITHOUT TWO-STAGE REVIEW |
 
-加えて、以下の AI 運用 4 原則（CLAUDE.md `<law>` セクション）が併存する:
+加えて、**AI 運用 4 原則**（[`docs/ai/project-rules.md`](./project-rules.md) F セクションが正本、CLAUDE.md `<law>` セクションが Claude Code 実行時の表示版）が併存する:
 
 1. AI はファイル生成・更新・プログラム実行前に作業計画を報告し、ユーザー確認を取る
 2. AI は迂回や別アプローチを勝手に行わない
 3. AI はツールであり決定権は常にユーザーにある
 4. AI はこれらのルールを歪曲・解釈変更しない
+
+> **重複時の解釈**: Iron Law 7 項目（実行契約レベル）と AI 運用 4 原則（プロジェクトルールレベル）はどちらも不可侵。両者が同一事項に触れる場合（例: 計画承認）、**より厳しい方を採用** する。
 
 ## 5. Decision rules
 

@@ -60,10 +60,23 @@
 - PR #126〜#131（計画書 + Parent C-3 + 子 plan + C-2 + Child C-3）
 - 本 PR（exec Step 1+2、新規ファイル 3 件）
 
-## 次セッションのタスク
+## 次セッションのタスク（Codex 相談を反映）
 
-1. ブランチ `feat/PBI-116-01-impl-step3-8` 作成
-2. T-9〜T-28 を順次実行（CLAUDE.md / AGENTS.md / project-rules.md / .claude/ / plugin/plangate/ の編集）
-3. evidence/verification.md 記録
-4. handoff.md 作成
-5. 子 PR → Child C-4 ゲート
+### PR-A: Step 5 → Step 3 → Step 4（入口ファイル薄型化）
+
+1. ブランチ `feat/PBI-116-01-impl-pr-a`（仮）
+2. **Step 5**: project-rules.md に Core Contract 参照追加（責務境界明文化）
+3. **Step 3**: CLAUDE.md を 21〜22 行へ薄型化（`<law>` 維持優先）
+4. **Step 4**: AGENTS.md を 24〜28 行へ薄型化（表 → 短い箇条書き）
+5. PR 作成 → C-4
+
+### PR-B: Step 6 → Step 7 → Step 8（hard-mandate 削減 + 検証 + handoff）
+
+1. ブランチ `feat/PBI-116-01-impl-pr-b`（仮）
+2. **Step 6**: hard-mandate 削減（必須 7 件 + 推奨 1 件 + 個別 4 件）
+3. **Step 7**: 検証（grep / wc / lint）→ evidence/verification.md
+4. **Step 8**: handoff.md / 子 PR → Child C-4 ゲート
+
+### 各 Step の Stop rule
+
+[plan.md の Stop rules セクション](./plan.md#stop-rules) 参照
