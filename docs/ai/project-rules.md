@@ -11,20 +11,25 @@ PlanGate — ゲート型AI駆動開発ワークフローのリポジトリ。
 ## B. ディレクトリ構造
 
 ```
+/bin/plangate            - PlanGate CLI 実体（v8〜）
+/schemas                 - artifact 用 JSON Schema（plan / handoff / status / approval 等）
+/workflows               - モード別 YAML（ultra-light / light / standard / high-risk / critical）
 /docs                    - ナレッジ・ガイドドキュメント
   /ai                    - 共通ルール・役割分担（本ファイルの置き場）
-  /workflows             - v7 実行層 Workflow 定義（WF-01〜WF-05）
+  /workflows             - v7 実行層 Workflow 定義（WF-01〜WF-05 + Orchestrator）
+  /rfc                   - RFC ドキュメント（plangate-decompose 等）
+  /schemas               - 子 PBI スキーマ等（child-pbi.yaml）
   /working               - チケット単位の作業コンテキスト（セッション永続化用）
     /templates           - artifact テンプレート（design.md, handoff.md 等）
 /.claude
-  /rules                 - Claude Code 運用ルール（hybrid-architecture.md 含む）
+  /rules                 - Claude Code 運用ルール（hybrid-architecture.md / orchestrator-mode.md 含む）
   /commands              - カスタムスラッシュコマンド
   /agents                - エージェント定義（詳細版、正本 / v7 責務ベース 5 体 + 既存 17 体）
   /skills                - カスタムスキル（v7 再利用 10 Skill + 既存 8 Skill）
 /.codex
   /agents                - Codex CLI 用エージェント定義（要約版 .toml）
 /plugin/plangate         - Claude Code plugin 配布パッケージ
-/release-notes           - リリースノート（v7.0.0〜）
+/release-notes           - リリースノート（v7.0.0〜v8.x）
 /scripts                 - 起動スクリプト
 ```
 
