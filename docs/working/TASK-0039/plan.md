@@ -85,7 +85,7 @@ PlanGate の中核ルール（Iron Law 7 項目）を維持したまま、**`CLA
 - **Output**: `evidence/verification.md` — 削減前後の token 比較、grep 結果の差分、Core Contract 参照の到達性確認
 - **Owner**: agent
 - **Risk**: 中
-- 🚩 チェックポイント: token 削減率 50% 以上を達成 / Iron Law 7 項目が CLAUDE.md / AGENTS.md / Core Contract に重複なく明示
+- 🚩 チェックポイント: token 削減率 50% 以上を達成 / Iron Law 7 項目は **Core Contract が正本** で、CLAUDE.md / AGENTS.md は参照中心（本文を重複転記しない）
 
 ### Step 8: 完了（PR 作成）
 
@@ -138,7 +138,7 @@ PlanGate の中核ルール（Iron Law 7 項目）を維持したまま、**`CLA
 - Iron Law 7 項目のうち、複数ファイルに重複している項目の整理（Core Contract が正本、他は参照）
 
 ### Verification Automation
-- `grep -rn "必ず\|絶対\|ALWAYS\|NEVER" CLAUDE.md AGENTS.md docs/ai/ .claude/ plugin/plangate/` で残存件数を確認 → Iron Law 7 項目以外がゼロ
+- `grep -rnE "必ず|絶対|ALWAYS|NEVER" CLAUDE.md AGENTS.md docs/ai/ .claude/ plugin/plangate/` で残存件数を確認 → **Iron Law 7 項目および AI 運用 4 原則以外がゼロ**（4 原則は CLAUDE.md `<law>` セクションで意図的に維持）
 - `wc -l CLAUDE.md AGENTS.md` で削減率を測定（50% 以上削減目標）
 
 ## Risks & Mitigations

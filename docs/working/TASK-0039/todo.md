@@ -8,7 +8,7 @@
 ### 準備フェーズ
 
 - [ ] 🚩 T-1: Scope/受入基準を再掲し、作業範囲を固定する（pbi-input.md / plan.md 再読込） [Owner: agent] [depends_on: -] [files: -]
-- [ ] 🚩 T-2: 既存 ai-driven-development.md の Iron Law 6 項目を確認し、追加 2 項目（root cause / two-stage review）の出典を特定 [Owner: agent] [depends_on: T-1] [files: docs/ai-driven-development.md]
+- [ ] 🚩 T-2: 既存 ai-driven-development.md の Iron Law 6 項目を確認し、新定義の 7 項目（root cause / two-stage review 含む）との差分を特定 [Owner: agent] [depends_on: T-1] [files: docs/ai-driven-development.md]
 
 ### 実装フェーズ（TDD: doc-review として、検証 → 実装 → 検証）
 

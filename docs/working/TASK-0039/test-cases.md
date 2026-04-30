@@ -43,7 +43,7 @@
 
 ### TC-5: hard-mandate キーワードが Iron Law 関連のみに限定
 - 前提条件: 変更後の全対象ファイル
-- 入力: `grep -rn "必ず\|絶対\|ALWAYS\|NEVER" CLAUDE.md AGENTS.md docs/ai/ .claude/ plugin/plangate/ 2>/dev/null`
+- 入力: `grep -rnE "必ず|絶対|ALWAYS|NEVER" CLAUDE.md AGENTS.md docs/ai/ .claude/ plugin/plangate/ 2>/dev/null`
 - 期待出力: ヒット箇所が全て Iron Law 7 項目に紐づく文脈、または明示的に許容された箇所（AI 運用 4 原則等）
 - 種別: 自動（grep）+ doc-review
 
