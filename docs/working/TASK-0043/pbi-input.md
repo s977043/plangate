@@ -21,7 +21,8 @@
    ```text
    base_contract        ← Phase 1 / docs/ai/core-contract.md
    + phase_contract     ← classify / plan / approve-wait / execute / review / verify / handoff
-   + risk_mode_contract ← ultra-light / light / standard / high-risk / critical
+   + risk_mode_contract ← ultra_light / light / standard / high_risk / critical
+                          （schema 識別子。人間可読 docs は ultra-light / high-risk のハイフン表記を維持）
    + model_adapter      ← Phase 2 / Model Profile の adapter
    = 実プロンプト
    ```
