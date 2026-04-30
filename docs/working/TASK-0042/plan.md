@@ -10,7 +10,7 @@ PlanGate の機械判定向け成果物（mode classification / review results /
 
 ### Constraints
 
-- 既存 `schemas/{handoff, plan, status, c3-approval, c4-approval}.schema.json` は変更しない
+- **既存 `schemas/*.schema.json` 全 12 件** は変更しない（c3-approval / c4-approval / handoff / pbi-input / plan / **review-external** / **review-self** / run-event / status / **test-cases** / todo + README.md。C-2 EX-04-01 対応で 5 件 → 12 件に拡張）
 - JSON Schema 2020-12 を採用（既存と統一）
 - doc-only PBI（実装コード変更なし）
 - 02/06 と完全独立（tool_policy / validation_bias は参照しない）
@@ -104,7 +104,7 @@ PlanGate の機械判定向け成果物（mode classification / review results /
 - CLAUDE.md, AGENTS.md
 - `.claude/rules/**`, `.claude/commands/**`, `.claude/agents/**`
 - `plugin/plangate/**`
-- 既存 `schemas/{handoff,plan,status,c3-approval,c4-approval}.schema.json`
+- 既存 `schemas/*.schema.json` 全件（c3-approval / c4-approval / handoff / pbi-input / plan / review-external / review-self / run-event / status / test-cases / todo）— 既存 review-* は本 PBI の review-result とは別責務として共存（C-2 EX-04-01 対応）
 
 ## Testing Strategy
 
@@ -133,7 +133,7 @@ PlanGate の機械判定向け成果物（mode classification / review results /
 
 | ID | Risk | Severity | Mitigation |
 |----|------|----------|-----------|
-| L1 | 既存 schemas/ schema との互換性崩壊 | medium | 既存 schema 変更禁止（forbidden_files）、命名衝突チェック |
+| L1 | 既存 schemas/ schema との互換性崩壊 | medium | 既存 schema **全 12 件** 変更禁止、命名衝突チェック、特に `review-self` / `review-external` と新規 `review-result` の責務境界を `structured-outputs.md` に明記（C-2 EX-04-01 対応） |
 | L2 | 新規 schema が冗長 / Markdown 重複 | medium | structured-outputs.md で境界明示 |
 | L3 | schema 準拠率が PBI-116-05 で扱いにくい | low | AC-6 で eval 観点明示、引き継ぎ |
 | L4 | 4 schema 同時設計で内部矛盾 | low | review-result が共通基底、他は specialization |

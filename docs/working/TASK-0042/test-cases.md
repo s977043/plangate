@@ -38,10 +38,17 @@
 - 期待: 削減対象 3 種以上明記（例: 巨大 JSON 例 / 出力強制句 / 形式テンプレ重複）
 - 種別: doc-review
 
-### TC-6: 既存 schemas 互換性（命名衝突なし）
-- 入力: `ls schemas/ | sort -u | wc -l` と修正前後で比較
-- 期待: 既存 5 schema (handoff/plan/status/c3-approval/c4-approval) は変更なし、新規 4 schema 追加のみ
+### TC-6: 既存 schemas 互換性（全 12 件、命名衝突なし）
+- 入力:
+  - `ls schemas/*.schema.json | wc -l`（変更前: 11、変更後: 15 を期待）
+  - `git diff main -- schemas/c3-approval.schema.json schemas/c4-approval.schema.json schemas/handoff.schema.json schemas/pbi-input.schema.json schemas/plan.schema.json schemas/review-external.schema.json schemas/review-self.schema.json schemas/run-event.schema.json schemas/status.schema.json schemas/test-cases.schema.json schemas/todo.schema.json`
+  - `grep -E "review-self|review-external" docs/ai/structured-outputs.md`
+- 期待:
+  - 既存 11 schema が変更なし（diff 出力空）
+  - 新規 4 schema 追加（review-result / acceptance-result / mode-classification / handoff-summary）
+  - structured-outputs.md に既存 review-self / review-external と新規 review-result の責務境界が明記
 - 種別: 自動 + doc-review
+- C-2 EX-04-01 対応
 
 ### TC-7: eval 引き継ぎ方針
 - 入力: `grep -E "eval|PBI-116-05" docs/ai/structured-outputs.md`

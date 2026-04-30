@@ -54,7 +54,7 @@ PlanGate には mode classification、review result、acceptance result、handof
 - 実際の API 統合実装
 - eval runner 実装（→ PBI-116-05）
 - 既存成果物の全移行
-- 既存 `schemas/{handoff, plan, status, c3-approval, c4-approval}.schema.json` の変更（互換性確認のみ）
+- 既存 `schemas/*.schema.json` 全 12 件の変更（互換性確認のみ。c3-approval / c4-approval / handoff / pbi-input / plan / review-external / review-self / run-event / status / test-cases / todo を含む。C-2 EX-04-01 対応で 5 件 → 12 件に拡張）
 
 ## 受入基準
 
@@ -62,7 +62,7 @@ PlanGate には mode classification、review result、acceptance result、handof
 - [ ] AC-2: `schemas/review-result.schema.json` / `acceptance-result.schema.json` / `mode-classification.schema.json` / `handoff-summary.schema.json` の 4 schema が新規定義されている
 - [ ] AC-3: Markdown 成果物と JSON 判定結果の責務境界が明文化されている
 - [ ] AC-4: プロンプトから削るべき巨大な出力形式指定が整理されている（最低 3 種類）
-- [ ] AC-5: 既存の `schemas/` 方針や frontmatter 標準化と矛盾していない（互換性検証）
+- [ ] AC-5: 既存の `schemas/` 方針や frontmatter 標準化と矛盾していない（**12 件すべての互換性検証**、特に `review-self` / `review-external` と新規 `review-result` の責務境界を `structured-outputs.md` に明記。C-2 EX-04-01 対応）
 - [ ] AC-6: schema 準拠率を eval 対象に含める方針が明記されている（PBI-116-05 への引き継ぎ）
 
 ## Notes from Refinement
