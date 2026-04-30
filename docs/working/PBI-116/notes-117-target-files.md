@@ -20,6 +20,15 @@
 
 **棚卸し総ファイル数**: 64 ファイル（推定）
 
+### ローカル vs Plugin のファイル数乖離について
+
+`.claude/` と `plugin/plangate/` でファイル数が異なる（rules 5 vs 9、commands 3 vs 7）のは意図的:
+
+- **Plugin 限定 rules**: `completion-gate.md` / `design-gate.md` / `evidence-ledger.md` / `review-gate.md` / `subagent-roles.md` / `worktree-policy.md` は **Plugin 配布時の追加ガードレール**（v8.1 CLI / 配布形態固有）。ローカル開発では `.claude/rules/` の薄い構成で十分。
+- **Plugin 限定 commands**: 同様に Plugin 配布形態に固有の入口を追加（v8.1 系で拡張）。
+
+**棚卸し方針**: Plugin 限定ファイルは「Plugin 配布版の補強」として **#117 の対象に含む**（同期対象外ではない）。ただし内容が `.claude/` 側と重複する場合は Plugin 側を権威として整理する（v8.1 以降の進化を反映）。
+
 ## hard-mandate キーワード初動スキャン
 
 正規表現 `必ず|絶対|ALWAYS|NEVER` でヒットしたファイルを 1 次抽出。`#117` の確認観点「`必ず`/`絶対`/`ALWAYS`/`NEVER` の乱用」検出のための初動。
@@ -56,13 +65,15 @@
 
 ## 不変制約（保持必須）
 
-`#117` の受入基準により、以下は **削減対象外**:
+`#117` の受入基準と既存 Iron Law（`docs/ai-driven-development.md` 定義）により、以下は **削減対象外**:
 
 - C-3 承認前に production code を変更しない
 - PBI 外の scope を追加しない
 - 検証証拠なしに完了扱いしない
 - 失敗・未実行・残リスクを隠さない
 - 承認済み plan と実装差分の整合性を崩さない
+- 原因調査なしに修正しない（`NO FIXES WITHOUT ROOT CAUSE INVESTIGATION`）
+- 2 段階レビューなしにマージしない（`NO MERGE WITHOUT TWO-STAGE REVIEW`）
 
 これらは Iron Law として明示維持し、`必ず` / `NEVER` の使用を許容する。
 
