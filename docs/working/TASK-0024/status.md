@@ -8,7 +8,7 @@
 - **対象 Issue**: #24（[TASK-0021-B] 再利用可能な Skill 10 個を整備する）
 - **ブランチ**: `docs/TASK-0024-skill-definitions`
 - **モード**: full
-- **状態**: exec 完了、PR 作成準備中
+- **状態**: ✅ **完了（PR #36 マージ済み、v7.0.0 リリース）**
 
 ## C-3 Gate: APPROVED (CONDITIONAL → APPROVE)
 
