@@ -1,6 +1,6 @@
 # PBI INPUT PACKAGE — TASK-0039 (PBI-116-01 / Issue #117)
 
-> **Status**: PREPARATORY ONLY — Parent C-3 ゲート（`docs/working/PBI-116/approvals/parent-c3.json`）APPROVED 待ち
+> **Status**: C-2 完了 / Child C-3 ゲート待ち（Parent C-3 APPROVED 2026-04-30、C-2 CONDITIONAL → 同 PR で対応済）
 > 親 PBI: [PBI-116](../PBI-116/parent-plan.md) / EPIC [#116](https://github.com/s977043/plangate/issues/116)
 > 子 PBI ID: PBI-116-01
 > Issue: [#117 Outcome-first Core Contract への移行（prompt slimming）](https://github.com/s977043/plangate/issues/117)
