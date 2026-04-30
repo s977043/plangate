@@ -15,6 +15,10 @@ child_pbi:
     - Provider runtime の全面刷新
     - eval runner の実装（PBI-116-05 で対応）
     - 実際の AI API 呼び出し統合
+  # PBI-116-04 (Structured Outputs) には意図的に依存しない:
+  # Prompt assembly の 4 層は Core Contract + Model Profile を統合するもので、
+  # Structured Outputs schema は出力契約として独立。両者は並行実行可能。
+  # 将来 prompt assembly が JSON 出力を要求する場合は別 PBI で対応する。
   dependencies:
     - PBI-116-01
     - PBI-116-02

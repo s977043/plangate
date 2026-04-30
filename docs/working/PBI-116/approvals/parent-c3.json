@@ -34,5 +34,5 @@
   ],
   "decision_options": ["APPROVED", "CONDITIONAL", "REJECTED"],
   "post_approval_action": "parent state を decomposition_approved に遷移し、PBI-116-01 (Phase 1) の docs/working/TASK-XXXX/ 着手を許可する",
-  "schema_reference": "schemas/c3-approval.schema.json"
+  "_schema_note": "本ファイルは親 PBI（Orchestrator Mode）用の approval であり、既存の schemas/c3-approval.schema.json（子 PBI 単位の C-3 用、task_id / phase: C-3 / c3_status を必須）とは別形式。親 PBI 用 schema は本 PBI-116 配下で v1 spec として確立する（schemas/parent-c3-approval.schema.json は別 PBI で形式化予定）。"
 }
