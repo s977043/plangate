@@ -6,9 +6,9 @@
 
 ## Goal
 
-PlanGate の中核ルール（Iron Law 7 項目）を維持したまま、**`CLAUDE.md` / `AGENTS.md` を outcome-first 形式に再構成**し、**両ファイルの行数を 50% 以下に削減**する（測定対象は CLAUDE.md と AGENTS.md の 2 ファイルのみ、ベースラインはマージ前の最新 main 上の行数）。Core Contract を `docs/ai/core-contract.md` に独立定義し、各入口から参照する構造に統一する。
+PlanGate の中核ルール（Iron Law 7 項目）を維持したまま、**`CLAUDE.md` / `AGENTS.md` を outcome-first 形式に再構成**し、**それぞれが個別に baseline の 50% 以下** に削減する（合計ではなく各ファイル単独評価、ベースラインはマージ前の最新 main 上の行数）。Core Contract を `docs/ai/core-contract.md` に独立定義し、各入口から参照する構造に統一する。
 
-> **削減対象の定義（C-2 EX-03 対応）**: 「常時ロード token 削減」の合否対象は **CLAUDE.md + AGENTS.md の 2 ファイルの行数** に固定する。`.claude/rules/` 等は段階的削減の対象だが本 PBI の合否判定には含めない（V2 候補）。
+> **削減対象の定義（C-2 EX-03 対応）**: 「常時ロード token 削減」の合否対象は **CLAUDE.md と AGENTS.md がそれぞれ単独で 50% 以下** に固定する（片方が削減できても他方が未達なら不合格）。`.claude/rules/` 等は段階的削減の対象だが本 PBI の合否判定には含めない（V2 候補）。
 
 ## Constraints / Non-goals
 
@@ -92,7 +92,7 @@ PlanGate の中核ルール（Iron Law 7 項目）を維持したまま、**`CLA
 - **Owner**: agent
 - **Risk**: 中
 - 🚩 チェックポイント:
-  - **CLAUDE.md + AGENTS.md の行数 50% 以下**（baseline は本 PR 開始時の main 上の値）
+  - **CLAUDE.md と AGENTS.md がそれぞれ単独で baseline の 50% 以下**（合計ではなく各ファイル単独評価、baseline は本 PR 開始時の main 上の値）
   - Iron Law 7 項目は **Core Contract が正本**、CLAUDE.md / AGENTS.md は参照中心（本文を重複転記しない）
   - hard-mandate キーワード残存 → Iron Law 7 項目および AI 運用 4 原則以外がゼロ
 
@@ -148,8 +148,8 @@ PlanGate の中核ルール（Iron Law 7 項目）を維持したまま、**`CLA
 
 ### Verification Automation
 - `grep -rnE "必ず|絶対|ALWAYS|NEVER" CLAUDE.md AGENTS.md docs/ai/ .claude/ plugin/plangate/` で残存件数を確認 → **Iron Law 7 項目および AI 運用 4 原則以外がゼロ**（4 原則は CLAUDE.md `<law>` セクションで意図的に維持）
-- `wc -l CLAUDE.md AGENTS.md` で削減率を測定（**合計 50% 以下**、合否対象はこの 2 ファイルのみ）
-- baseline は本 PR の base 時点（feat/PBI-116-01-impl ブランチ作成時）の値を `evidence/verification.md` に記録
+- `wc -l CLAUDE.md AGENTS.md` で削減率を測定（**各ファイルが個別に baseline の 50% 以下**、合否対象はこの 2 ファイルのみ）
+- baseline は本 PR の base 時点（feat/PBI-116-01-impl ブランチ作成時）の値を `evidence/verification.md` に記録（CLAUDE.md / AGENTS.md それぞれの行数）
 
 ## Risks & Mitigations
 
