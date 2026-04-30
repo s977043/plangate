@@ -15,8 +15,8 @@
 - [ ] 🚩 T-8: schema 準拠率 95% 基準（Phase 2 引き継ぎ）
 
 ### Step 2: eval-cases skeleton
-- [ ] 🚩 T-9〜T-15: 7 eval-cases ファイル（scope/approval/ac/verification/stop/tool/format）
-- [ ] 🚩 T-16: eval-comparison-template.md
+- [ ] 🚩 T-9〜T-16: **8 eval-cases ファイル**（scope/approval/ac/verification/stop/tool/format/**latency-cost**、C-2 Gemini 対応で 7→8 に修正）
+- [ ] 🚩 T-17: eval-comparison-template.md
 
 ### 検証
 - [ ] 🚩 T-17: 自動検証（ls / grep / wc）

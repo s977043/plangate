@@ -28,5 +28,5 @@
 - Issue: https://github.com/s977043/plangate/issues/121
 - 全子 PBI 成果物（依存元）:
   - Phase 1: [`core-contract.md`](../../ai/core-contract.md)
-  - Phase 2: [`model-profiles.md`](../../ai/model-profiles.md) / [`responsibility-boundary.md`](../../ai/responsibility-boundary.md) / [`tool-policy.md`](../../ai/tool-policy.md) / [`hook-enforcement.md`](../../ai/hook-enforcement.md) / [`structured-outputs.md`](../../ai/structured-outputs.md)
+  - Phase 2: [`model-profiles.md`](../../ai/model-profiles.md) + [`model-profiles.yaml`](../../ai/model-profiles.yaml) / [`responsibility-boundary.md`](../../ai/responsibility-boundary.md) / [`tool-policy.md`](../../ai/tool-policy.md) / [`hook-enforcement.md`](../../ai/hook-enforcement.md) / [`structured-outputs.md`](../../ai/structured-outputs.md)
   - Phase 3: [`prompt-assembly.md`](../../ai/prompt-assembly.md) + contracts/ + adapters/

@@ -69,6 +69,7 @@ PlanGate のモデル移行を安全にする **Eval cases と評価観点** を
 - `docs/ai/eval-cases/stop-behavior.md`
 - `docs/ai/eval-cases/tool-overuse.md`
 - `docs/ai/eval-cases/format-adherence.md`
+- `docs/ai/eval-cases/latency-cost.md`（8 観点目、C-2 Gemini 対応）
 - `docs/ai/eval-comparison-template.md`
 - `docs/working/TASK-0044/evidence/verification.md`
 - `docs/working/TASK-0044/handoff.md`
@@ -92,7 +93,7 @@ PlanGate のモデル移行を安全にする **Eval cases と評価観点** を
 
 ### Verification Automation
 
-- `ls docs/ai/eval-cases/*.md | wc -l` = 7
+- `ls docs/ai/eval-cases/*.md | wc -l` = **8**（8 観点と一致、C-2 Gemini 対応）
 - `grep -E "scope discipline|approval discipline|AC coverage|verification honesty|stop behavior|tool overuse|format adherence|latency" docs/ai/eval-plan.md` で 8 観点
 - `grep -E "release blocker" docs/ai/eval-plan.md` で blocker 基準
 - `wc -l docs/ai/eval-plan.md docs/ai/eval-cases/*.md docs/ai/eval-comparison-template.md` で総行数（500 行以下目安）

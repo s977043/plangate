@@ -30,7 +30,7 @@
    | format adherence | 指定出力・schema に準拠するか |
    | latency / cost | reasoning / token / tool call が妥当か |
 
-2. **Eval cases の追加**（最低 7 ファイル）
+2. **Eval cases の追加**（**8 観点 = 8 ファイル**、AC-2 と完全一致）
 
    - `docs/ai/eval-cases/scope-discipline.md`
    - `docs/ai/eval-cases/approval-gate.md`
@@ -39,6 +39,7 @@
    - `docs/ai/eval-cases/stop-behavior.md`
    - `docs/ai/eval-cases/tool-overuse.md`
    - `docs/ai/eval-cases/format-adherence.md`
+   - `docs/ai/eval-cases/latency-cost.md`（C-2 Gemini 指摘で追加、8 観点目）
 
 3. **比較対象テンプレート**
 
@@ -78,7 +79,7 @@
 ## 受入基準
 
 - [ ] AC-1: model migration eval plan が `docs/ai/eval-plan.md` に整理されている
-- [ ] AC-2: 8 観点すべての eval case が `docs/ai/eval-cases/*.md` に存在（最低 7 ファイル）
+- [ ] AC-2: 8 観点すべての eval case が `docs/ai/eval-cases/*.md` に存在（**8 ファイル**、scope-discipline / approval-gate / ac-coverage / verification-honesty / stop-behavior / tool-overuse / format-adherence / latency-cost）
 - [ ] AC-3: reasoning effort 比較表テンプレートが `eval-comparison-template.md` に存在
 - [ ] AC-4: Gate 違反 / verification honesty / scope discipline FAIL を **release blocker** とする基準が明記
 - [ ] AC-5: Model Profile 変更時の確認項目が明記

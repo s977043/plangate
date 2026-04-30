@@ -25,7 +25,7 @@ ls docs/ai/eval-plan.md && grep -E "^## " docs/ai/eval-plan.md
 ```bash
 ls docs/ai/eval-cases/*.md | wc -l
 ```
-期待: 7 件以上
+期待: **8 件**（8 観点と完全一致、C-2 Gemini 対応）
 
 ### TC-3: eval-comparison-template.md 存在
 ```bash
