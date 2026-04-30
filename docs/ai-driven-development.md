@@ -554,3 +554,5 @@ D: TDD実装 → L-0: リンター自動修正 → V-1: 受け入れ検査 → V
 | レビュー原則 | `.claude/rules/review-principles.md` |
 | handoff テンプレート | `docs/working/templates/handoff.md` |
 | テンプレート | `docs/working/TASK-XXXX/` |
+| テストスイート | `tests/` |
+| 変更履歴 | `CHANGELOG.md` |
