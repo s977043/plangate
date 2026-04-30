@@ -52,7 +52,7 @@
 | 4 | **失敗・未実行・残リスクを隠さない** | verification honesty（独立明記） |
 | 5 | **承認済み plan と実装差分の整合性を崩さない** | brainstorming: NO CODE WITHOUT APPROVED DESIGN FIRST |
 | 6 | **原因調査なしに修正しない** | systematic-debugging: NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST |
-| 7 | **2 段階レビューなしにマージしない** | subagent-driven-development: NO MERGE WITHOUT TWO-STAGE REVIEW |
+| 7 | **2 段階レビュー（C-3 計画承認 + C-4 PR 承認）なしにマージしない** | subagent-driven-development: NO MERGE WITHOUT TWO-STAGE REVIEW |
 
 加えて、**AI 運用 4 原則**（[`docs/ai/project-rules.md`](./project-rules.md) F セクションが正本、CLAUDE.md `<law>` セクションが Claude Code 実行時の表示版）が併存する:
 
@@ -80,7 +80,7 @@
 
 - **コードベース**: 既存実装、テスト、git history
 - **計画ドキュメント**: plan.md / todo.md / test-cases.md / pbi-input.md
-- **承認記録**: approvals/c3.json（plan_hash で改竄検出可能）
+- **承認記録**: 作業ディレクトリ内の `approvals/c3.json`（`docs/working/TASK-XXXX/approvals/c3.json`、plan_hash で改竄検出可能）
 - **レビュー記録**: review-self.md / review-external.md
 - **CLAUDE.md / AGENTS.md / project-rules.md**: プロジェクト固有の context
 
@@ -113,7 +113,7 @@
 
 ## 参照
 
-- 入口（薄型化済）: [`CLAUDE.md`](../../CLAUDE.md) / [`AGENTS.md`](../../AGENTS.md)
+- 入口: [`CLAUDE.md`](../../CLAUDE.md) / [`AGENTS.md`](../../AGENTS.md)
 - 共通ルール: [`docs/ai/project-rules.md`](./project-rules.md)
 - ワークフロー詳細: [`docs/ai-driven-development.md`](../ai-driven-development.md)
 - Workflow phase 定義: [`docs/workflows/README.md`](../workflows/README.md)
