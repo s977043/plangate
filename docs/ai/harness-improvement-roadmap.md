@@ -168,7 +168,7 @@ docs/ai/eval-comparison-template.md    # metrics 列追加
 | --- | --- |
 | gate_bounce_rate | C-3 / C-4 差し戻し率 |
 | hook_violation_count | EH / EHS 違反数 |
-| v1_first_pass | V-1 初回 PASS 여부 |
+| v1_first_pass | V-1 初回 PASS の有無 |
 | fix_loop_count | 修正ループ回数 |
 | tool_call_count | tool 呼び出し回数 |
 | rework_count | AI 出力後の再修正数 |
@@ -276,7 +276,7 @@ docs/ai/keep-rate.md
 
 | 種別 | 扱い |
 | --- | --- |
-| PBI / approved plan / test-cases / c3.json | 契約コンテキストとして固定 |
+| PBI / approved plan / test-cases / C-3 承認 (c3.json) | 契約コンテキストとして固定 |
 | git status / diff / recent files / test failure | 作業コンテキストとして動的取得 |
 | repo structure / coding rules | 必要時取得 |
 | 過去 handoff / 関連 PBI | 必要時検索 |
@@ -313,7 +313,7 @@ docs/ai/context-engine.md
 
 - contract context と dynamic context が分離されている
 - mode / profile に応じた context budget が適用される
-- stale plan / stale c3 は Hook / validate と矛盾しない
+- stale plan / stale C-3 は Hook / validate と矛盾しない
 - Prompt Assembly との接続方針が明記されている
 
 ## 12. Phase 6: Reporting & Retrospective
@@ -483,5 +483,5 @@ Acceptance Criteria:
 2. scripts/metrics-collector.py
 3. bin/plangate metrics <TASK-XXXX>
 4. docs/ai/metrics.md
-5. hook violation / c3 / v1 / c4 の最小集計
+5. hook violation / C-3 / V-1 / C-4 の最小集計
 ```
