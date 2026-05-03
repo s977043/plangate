@@ -181,7 +181,7 @@ GitHub 上で PR をレビューし、準備ができたらマージします。
 /plugin/plangate         — Claude Code plugin パッケージ
 /scripts                 — ヘルパースクリプト、hook、parser、CI 補助
 /examples                — PlanGate 成果物の完成例
-/tests                   — CLI / hook テストスイート（fixtures + extras + run-tests.sh）
+/tests                   — CLI / hook テストスイート（fixtures + hooks + extras + run-tests.sh）
 ```
 
 ## Claude Code + Codex CLI
@@ -242,7 +242,7 @@ v8.5.0 時点のテスト状況:
 - `plangate exec` — C-3 gate 未通過時の実行ブロック
 - hook enforcement — plan / approval / hash / test-cases / evidence / forbidden_files / merge approvals / V-3 review の検査
 
-CI は同じ CLI スイートを全 PR で `.github/workflows/test.yml` を通じて実行します。
+CI は同じ CLI / hook スイートを全 PR で `.github/workflows/test.yml` を通じて実行します。
 
 ## Provider サポート
 

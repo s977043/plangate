@@ -181,7 +181,7 @@ See [plugin/plangate/README.md](plugin/plangate/README.md) for plugin registrati
 /plugin/plangate         — Claude Code plugin package
 /scripts                 — Helper scripts, hooks, parsers, CI helpers
 /examples                — Worked examples of PlanGate artifacts
-/tests                   — CLI / hook test suite (fixtures + extras + run-tests.sh)
+/tests                   — CLI / hook test suite (fixtures + hooks + extras + run-tests.sh)
 ```
 
 ## Claude Code + Codex CLI
@@ -242,7 +242,7 @@ Main coverage:
 - `plangate exec` — blocked execution when the C-3 gate has not cleared
 - hook enforcement — plan / approval / hash / test-cases / evidence / forbidden_files / merge approvals / V-3 review checks
 
-CI runs the same CLI suite on every PR via `.github/workflows/test.yml`.
+CI runs the same CLI / hook suites on every PR via `.github/workflows/test.yml`.
 
 ## Provider Support
 
