@@ -23,10 +23,10 @@ PlanGate は v8.6.0 で、Hook enforcement の上に **Metrics v1** と **Harnes
 | 項目 | 状態 |
 | --- | --- |
 | 最新リリース | **v8.6.0** — Harness Improvement Roadmap Phase 0/1 + Governance |
-| Hook enforcement | **10/10 hooks 実装済み**（v8.5.0 から維持）|
-| Metrics v1 | `bin/plangate metrics` による workflow event 集計（v8.6.0）|
-| Baseline | v8.5.0 直後の baseline を `docs/ai/eval-baselines/` に固定（v8.6.0）|
-| Governance | Issue / Label / Milestone Governance + Metrics Privacy Policy（v8.6.0）|
+| Hook enforcement | **10/10 hooks 実装済み**（v8.5.0 から維持） |
+| Metrics v1 | `bin/plangate metrics` による workflow event 集計（v8.6.0） |
+| Baseline | v8.5.0 直後の baseline を `docs/ai/eval-baselines/` に固定（v8.6.0） |
+| Governance | Issue / Label / Milestone Governance + Metrics Privacy Policy（v8.6.0） |
 | CLI テスト | `sh tests/run-tests.sh` — **32 PASS** |
 | Hook テスト | `sh tests/hooks/run-tests.sh` — **42 PASS** |
 | Eval | `bin/plangate eval` による 8 観点評価と release blocker 検知 |
