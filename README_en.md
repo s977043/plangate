@@ -18,18 +18,21 @@ Unlike agent frameworks that focus on autonomy, PlanGate focuses on **approval b
 
 ## Current Status
 
-As of v8.5.0, PlanGate is no longer just a workflow document set. It has become an executable governance harness with CLI, hooks, schemas, eval, and CI.
+As of v8.6.0, PlanGate combines Hook enforcement with **Metrics v1** and **Harness Improvement Governance**, so the improvement cycle can be judged by comparison rather than intuition.
 
 | Item | Status |
 | --- | --- |
-| Latest release | **v8.5.0** — Hook enforcement complete |
-| Hook enforcement | **10/10 hooks implemented** |
-| CLI tests | `sh tests/run-tests.sh` — **24 PASS** |
+| Latest release | **v8.6.0** — Harness Improvement Roadmap Phase 0/1 + Governance |
+| Hook enforcement | **10/10 hooks implemented** (carried over from v8.5.0) |
+| Metrics v1 | Workflow event collection and reporting via `bin/plangate metrics` (v8.6.0) |
+| Baseline | v8.5.0 baseline fixed under `docs/ai/eval-baselines/` (v8.6.0) |
+| Governance | Issue / Label / Milestone Governance + Metrics Privacy Policy (v8.6.0) |
+| CLI tests | `sh tests/run-tests.sh` — **32 PASS** |
 | Hook tests | `sh tests/hooks/run-tests.sh` — **42 PASS** |
 | Eval | 8-observation evaluation and release blocker detection via `bin/plangate eval` |
 | Schema | JSON artifact validation via `validate-schemas` + CI |
 
-v8.5.0 can check these invariants through hooks and CLI:
+v8.6.0 can check these invariants through hooks and CLI:
 
 - Detect production code edits without `plan.md`
 - Block execution without C-3 approval
@@ -225,11 +228,11 @@ sh tests/run-tests.sh
 sh tests/hooks/run-tests.sh
 ```
 
-Test status as of v8.5.0:
+Test status as of v8.6.0:
 
 | Suite | Count | Main coverage |
 | --- | ---: | --- |
-| `tests/run-tests.sh` | **24 PASS** | CLI, Workflow DSL, schema validate, eval, provider dispatch, fixture validation |
+| `tests/run-tests.sh` | **32 PASS** | CLI, Workflow DSL, schema validate, eval, metrics v1, provider dispatch, fixture validation |
 | `tests/hooks/run-tests.sh` | **42 PASS** | EH-1 to EH-7 / EHS-1 to EHS-3, default / strict / bypass mode behavior |
 
 Main coverage:
@@ -238,11 +241,48 @@ Main coverage:
 - `plangate validate --mode <mode>` — artifact list determined dynamically from Workflow DSL
 - `plangate validate-schemas` — JSON Schema compliance for task artifacts
 - `plangate eval` — 8-observation evaluation, baseline comparison, release blocker detection
+- `plangate metrics` — workflow event collection / reporting (v8.6.0)
 - `plangate review` — external reviewer provider dispatch
 - `plangate exec` — blocked execution when the C-3 gate has not cleared
 - hook enforcement — plan / approval / hash / test-cases / evidence / forbidden_files / merge approvals / V-3 review checks
 
 CI runs the same CLI / hook suites on every PR via `.github/workflows/test.yml`.
+
+## Metrics v1 — 5-minute quickstart (v8.6.0)
+
+PlanGate v8.6.0 introduces structured workflow event collection and aggregation.
+It is opt-in: existing workflows are unaffected.
+
+```bash
+# 1. After a TASK completes, collect events (append-only NDJSON)
+bin/plangate metrics TASK-XXXX --collect
+
+# 2. Show summary for that TASK
+bin/plangate metrics TASK-XXXX --report
+
+# 3. Aggregate across all TASKs (hook violations / C-3 / V-1 / C-4 / by mode)
+bin/plangate metrics --report --aggregate
+
+# 4. Emit JSON (for baseline comparison or CI pipelines)
+bin/plangate metrics TASK-XXXX --report --json
+```
+
+Sample artifacts:
+
+- [`examples/sample-task/metrics-events.ndjson`](examples/sample-task/metrics-events.ndjson) — minimal 8-event example
+- [`examples/sample-task/metrics-summary.md`](examples/sample-task/metrics-summary.md) — sample `--report` output
+
+| Item | Location / Spec |
+| --- | --- |
+| Event schema | [`schemas/plangate-event.schema.json`](schemas/plangate-event.schema.json) — 11 events, `additionalProperties: false` |
+| Event log | `docs/working/_metrics/events.ndjson` — **excluded by `.gitignore`, never committed** |
+| Privacy policy | [`docs/ai/metrics-privacy.md`](docs/ai/metrics-privacy.md) — only §3 Allowed fields are emitted; §4 Forbidden is blocked at the schema level |
+| Privacy enforcement | Hook EH-8 (`scripts/hooks/check-metrics-privacy.sh`) — checks staging for events.ndjson / Forbidden fields |
+| Baseline | [`docs/ai/eval-baselines/2026-05-04-baseline.{md,json}`](docs/ai/eval-baselines/) — fixed snapshot just after v8.5.0, the comparison anchor for later improvements |
+| Operational guide | [`docs/ai/metrics.md`](docs/ai/metrics.md) — 9-chapter guide |
+
+> [!NOTE]
+> **`docs/working/_metrics/events.ndjson` is never committed to the public repo.** Privacy is enforced by three layers: `.gitignore` + Hook EH-8 + schema `additionalProperties: false`.
 
 ## Provider Support
 

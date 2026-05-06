@@ -1,7 +1,7 @@
 # Harness Improvement Roadmap
 
 > **Status**: v1.1（Phase 0 / 1 + Governance Done — v8.6.0 で完走、Phase 2 以降と Lightweight Plan Quality Checks は Proposed）
-> **Progress**: Phase 0 ✅ / Phase 1 ✅ / Governance (#201, #202) ✅ / Phase 2〜6 🔵 Open / Plan Quality Checks (#213) 🔵 Open
+> **Progress**: Phase 0 ✅ / Phase 1 ✅ / Governance (#201, #202) ✅ / Phase 2〜6 🔵 Open / Lightweight Plan Quality Checks (#213) 🔵 Open
 > 関連: [`philosophy.md`](../philosophy.md) / [`eval-plan.md`](./eval-plan.md) / [`eval-runner.md`](./eval-runner.md) / [`metrics.md`](./metrics.md) / [`metrics-privacy.md`](./metrics-privacy.md) / [`issue-governance.md`](./issue-governance.md) / [`eval-baselines/2026-05-04-baseline.md`](./eval-baselines/2026-05-04-baseline.md) / [`model-profiles.md`](./model-profiles.md) / [`prompt-assembly.md`](./prompt-assembly.md) / [`tool-policy.md`](./tool-policy.md) / [`hook-enforcement.md`](./hook-enforcement.md)
 
 ## 1. 目的
@@ -181,7 +181,7 @@ docs/ai/eval-comparison-template.md    # metrics 列追加
 | tool_call_count | tool 呼び出し回数 |
 | rework_count | AI 出力後の再修正数 |
 | plan_health_score | Lightweight Plan Quality Checks による計画品質スコア |
-| open_risk_count | 未解決 risk / assumption の数 |
+| open_risk_assumption_count | 未解決 risk / assumption の合計数（Lightweight Plan Quality Checks 出力）|
 
 ### 完了条件
 
@@ -391,7 +391,7 @@ PlanGate の実利用シグナルを、スプリントレビュー / retrospecti
 | fix loop count | 自己修正効率 |
 | hook violation rate | ガードレール違反傾向 |
 | Plan Health Score | 計画品質の変化 |
-| Open Risk Count | 未解決 risk / assumption の傾向 |
+| Open Risk / Assumption Count | 未解決 risk / assumption の傾向（`open_risk_assumption_count` 由来）|
 | Keep Rate | AI 成果物の実採用度 |
 | latency / cost | 運用効率 |
 | model profile comparison | profile ごとの費用対効果 |
@@ -543,7 +543,7 @@ Acceptance Criteria:
 | --- | --- |
 | metrics が増えて運用が重くなる | Phase 1 は opt-in / append-only / 最小 event から始める |
 | LLM judge が誤判定する | satisfaction signal は soft metric とし、release blocker にしない |
-| Plan Quality Check が hard gate 化して重くなる | 初期は手動実行可能な lightweight check とし、blocking 判定にしない |
+| Lightweight Plan Quality Checks が hard gate 化して重くなる | 初期は手動実行可能な lightweight check とし、blocking 判定にしない（Plan / Risk / Done Check のいずれも非 blocking 維持）|
 | Keep Rate 算出が不安定 | unknown を許容し、honesty を優先する |
 | context engine が複雑化する | contract / dynamic の 2 分類から始める |
 | profile v2 が provider 固有に寄りすぎる | Core Contract / Gate / Artifact schema は共通維持する |

@@ -32,7 +32,7 @@ bin/plangate metrics TASK-0061 --collect
 
 実行内容: `docs/working/TASK-0061/` の以下ファイル群を読み、event を抽出して `docs/working/_metrics/events.ndjson` に append する。
 
-| 対象ファイル | 導出 event |
+| 対象ファイル / ソース | 導出 event |
 |------------|----------|
 | `pbi-input.md` | `task_initialized` |
 | `plan.md` | `plan_generated` (plan_hash 含む、mode 自動検出) |
@@ -40,6 +40,8 @@ bin/plangate metrics TASK-0061 --collect
 | `evidence/` | `exec_started` (最初の evidence 作成時刻) |
 | `handoff.md` | `v1_completed` (AC PASS/FAIL カウント) + `handoff_completed` |
 | `review-external.md` | `external_review_completed` |
+| `docs/working/_audit/hook-events.log` | `hook_violation` (v8.6.0 PR3、A-1: VIOLATION/WARNING を自動変換、PASS/BYPASS は emit せず、message column は privacy §4 のため emit せず)|
+| `git log` on `handoff.md` | `pr_created` (v8.6.0 PR3、A-2: squash-merge subject 末尾の `(#NN)` から PR 番号抽出、`pr_number` のみ emit)|
 
 **dry-run** で append 前に内容確認:
 
@@ -60,16 +62,84 @@ bin/plangate metrics --report --aggregate
 bin/plangate metrics TASK-0061 --report --json
 ```
 
-### 3.3 hook violation の手動記録
+### 3.3 hook_violation の自動取得（v8.6.0 PR3 / A-1）
 
-PBI-HI-001 では hook 側からの自動 emit は **scope 外**。手動で append する場合は schema 準拠 NDJSON を append する：
+`bin/plangate metrics --collect` 実行時、`docs/working/_audit/hook-events.log` を自動的に読み込み、対象 TASK の **VIOLATION / WARNING** ログを `hook_violation` event に変換して emit する。
+
+| audit log level | hook_result |
+|----------------|-------------|
+| `VIOLATION` / `BLOCK` | `block` |
+| `WARNING` / `WARN` | `warn` |
+| `PASS` / `BYPASS` | emit しない（success / bypass はノイズ） |
+
+hook script 名は schema 準拠の hook_id に変換される（例: `check-c3-approval` → `EH-2`、`check-merge-approvals` → `EH-7`、`check-metrics-privacy` → `EH-8`）。**audit log の message 列は metrics-privacy.md §4 違反を避けるため emit しない**。
+
+手動 append が必要な場合は schema 準拠 NDJSON を `>>` で追記可能：
 
 ```bash
 echo '{"schema_version":"1.0","ts":"2026-05-04T07:00:00Z","task_id":"TASK-0061","event":"hook_violation","hook_id":"EH-1","hook_result":"block"}' \
   >> docs/working/_metrics/events.ndjson
 ```
 
-自動 emit は v8.7+ 候補（hook 側修正が必要、scope 外）。
+### 3.4 pr_created の自動取得（v8.6.0 PR3 / A-2）
+
+`handoff.md` をタッチした最新 git commit を対象に、subject 末尾の `(#NN)` パターン（squash-merge convention）から PR 番号を抽出し、`pr_created` event を emit する。`pr_number` のみ記録され、commit ハッシュ・ブランチ名・著者・本文は emit しない（privacy §4 準拠）。
+
+git が無い / commit が見つからない場合は silent に skip。
+
+### 3.5 mode 別集計（v8.6.0 PR6 / H-3）
+
+`bin/plangate metrics --report --aggregate` または `--report --json` の出力に `By mode` セクション / `by_mode` フィールドが追加される。
+
+- TASK ごとに plan_generated event の `mode` を解決して、各 mode の C-3 / V-1 / C-4 verdict と hook violation を別々に集計
+- V-1 PASS rate (%) も自動計算
+- harness 変更が mode 別にどう効いたかを比較可能（後続 PBI-HI-002 / #196 Eval expansion でフル活用予定）
+
+出力例（aggregate text）：
+
+```text
+## By mode (H-3)
+- **light**: V-1 12/14 PASS (85.71%) / C-3 APPROVED=10 / hook_violations=2
+- **standard**: V-1 5/5 PASS (100.0%) / C-3 APPROVED=5 / hook_violations=0
+```
+
+### 3.6 整合性検証（v8.6.0 PR5 / H-1）
+
+`bin/plangate metrics --validate` で `events.ndjson` 全行を `plangate-event.schema.json` で validate。違反は line:reason 形式で最大 20 件報告、exit 1。jsonschema 未導入時は SKIP（exit 0）。
+
+### 3.7 機械可読化と時刻フィルタ（v8.6.0 PR7）
+
+#### K-1: `--markdown-section`（handoff §7 用）
+
+```bash
+bin/plangate metrics TASK-XXXX --report --markdown-section
+```
+
+handoff template §7 に直接貼り付けられる markdown 表（events / modes / C-3 / V-1 / C-4 / hook violations / fix_loop_max + by_mode 表 + privacy 注記）を出力する。
+
+#### K-2: `--since <date>`
+
+```bash
+bin/plangate metrics --report --aggregate --since 2026-05-04
+bin/plangate metrics --report --aggregate --since 2026-05-04T12:00:00Z
+```
+
+ts >= 指定 ISO 日時の event のみで集計する。`YYYY-MM-DD` 略記時は `T00:00:00Z` 補完。改善前後の比較や週次レポートに利用。
+
+#### K-3: `bin/plangate doctor --json`
+
+```bash
+bin/plangate doctor --json
+# {
+#   "scope": "v8.6.0 Metrics & Privacy",
+#   "checks": [...16 件...],
+#   "failures": 0,
+#   "warnings": 0,
+#   "passed": true
+# }
+```
+
+CI 統合用。v8.6.0 metrics & privacy セクション 16 check の結果を JSON で返す。`failures > 0` で exit 1。
 
 ## 4. Privacy
 
@@ -137,7 +207,10 @@ baseline と metrics summary を組み合わせると、改善前後の差分が
 ## 9. 関連
 
 - [Issue #195 PBI-HI-001 Metrics v1](https://github.com/s977043/plangate/issues/195)
-- [docs/ai/metrics-privacy.md](./metrics-privacy.md)
-- [docs/ai/eval-baselines/2026-05-04-baseline.md](./eval-baselines/2026-05-04-baseline.md)
-- [docs/ai/harness-improvement-roadmap.md](./harness-improvement-roadmap.md)
+- [docs/ai/metrics-privacy.md](./metrics-privacy.md) — §3 Allowed / §4 Forbidden / privacy 強制 3 層
+- [docs/ai/eval-baselines/2026-05-04-baseline.md](./eval-baselines/2026-05-04-baseline.md) — 比較起点 baseline
+- [docs/ai/harness-improvement-roadmap.md](./harness-improvement-roadmap.md) — Phase 1 (#195) を含むロードマップ
+- [docs/ai/issue-governance.md](./issue-governance.md) — Issue / Label / Milestone Governance（v8.6.0 governance trio の一角）
 - [schemas/plangate-event.schema.json](../../schemas/plangate-event.schema.json)
+- [scripts/hooks/check-metrics-privacy.sh](../../scripts/hooks/check-metrics-privacy.sh) — EH-8 privacy 強制 hook
+- [examples/sample-task/metrics-events.ndjson](../../examples/sample-task/metrics-events.ndjson) / [metrics-summary.md](../../examples/sample-task/metrics-summary.md) — 利用例
