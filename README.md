@@ -278,7 +278,7 @@ bin/plangate metrics TASK-XXXX --report --json
 | Event log | `docs/working/_metrics/events.ndjson` — **`.gitignore` で除外、commit 禁止** |
 | Privacy policy | [`docs/ai/metrics-privacy.md`](docs/ai/metrics-privacy.md) — §3 Allowed のみ emit、§4 Forbidden は schema レベルで物理的に阻止 |
 | Privacy enforcement | Hook EH-8 (`scripts/hooks/check-metrics-privacy.sh`) — staging に events.ndjson / Forbidden field がないか検査 |
-| Baseline | [`docs/ai/eval-baselines/2026-05-04-baseline.{md,json}`](docs/ai/eval-baselines/) — v8.5.0 直後の固定 snapshot（後続改善との比較起点）|
+| Baseline | [`docs/ai/eval-baselines/2026-05-04-baseline.{md,json}`](docs/ai/eval-baselines/) — v8.5.0 直後の固定 snapshot（後続改善との比較起点） |
 | Operational guide | [`docs/ai/metrics.md`](docs/ai/metrics.md) — 9 章運用 guide |
 
 > [!NOTE]
