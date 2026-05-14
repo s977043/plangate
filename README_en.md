@@ -29,8 +29,8 @@ PlanGate distributes **"a safe pattern for AI-driven development"** — not a fr
 | Stays Markdown-first to keep cognitive load low | Require SaaS or external stores |
 
 > **Design center**: Not the Steering Loop (observation), but **evaluation → learning → governance**.
-> The Steering Loop is the *foundation* of self-evolution, not its center.
-> See [`docs/working/discussions/`](docs/working/discussions/) for the 5-round Claude × Codex × Gemini strategy discussions.
+> The Steering Loop here means "the observation loop that records every control point into events.ndjson so the run can be replayed later." It is the *foundation* of self-evolution, not its center.
+> See [docs/philosophy.md (Japanese)](docs/philosophy.md#自己進化フレームの設計判断) and [`docs/working/discussions/`](docs/working/discussions/) for the 5-round Claude × Codex × Gemini strategy discussions.
 
 ## Staged Adoption Levels
 
