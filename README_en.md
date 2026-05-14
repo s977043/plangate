@@ -23,9 +23,9 @@ PlanGate distributes **"a safe pattern for AI-driven development"** — not a fr
 | What PlanGate **does** | What PlanGate **does not do** |
 | --- | --- |
 | Provides a pattern: plan → approve → implement → verify → handoff | Let AI rewrite skills or prompts on its own |
-| Fixes human decision points at C-3 / C-4 / V-1〜V-4 | Aim for fully autonomous agents |
+| Fixes human decision points at C-3 / C-4 / V-1 to V-4 | Aim for fully autonomous agents |
 | Makes failures and successes explainable after the fact (observation / reproducibility foundation) | Become a fully reproducible durable execution engine |
-| Provides staged adoption levels (Level 1〜5) | Force all features from day one |
+| Provides staged adoption levels (Level 1 to 5) | Force all features from day one |
 | Stays Markdown-first to keep cognitive load low | Require SaaS or external stores |
 
 > **Design center**: Not the Steering Loop (observation), but **evaluation → learning → governance**.
@@ -34,7 +34,7 @@ PlanGate distributes **"a safe pattern for AI-driven development"** — not a fr
 
 ## Staged Adoption Levels
 
-You **don't need to use all features from the start**. Adopt only what you need across 5 levels.
+You **don't need to use all features from the start**. Adopt only what you need across 5 levels (Level 1 to 5).
 
 | Level | Scope | When to use |
 | --- | --- | --- |
@@ -60,7 +60,7 @@ flowchart LR
     style L5 fill:#ffd6a5
 ```
 
-> **About image updates**: The existing [`docs/assets/harness-plangate-readme-dark-v2.png`](docs/assets/harness-plangate-readme-dark-v2.png) is a v7〜v8.6-era overview and remains valid. A new image reflecting the staged adoption levels and self-evolution frame finalized in v8.7.0 will be considered separately as a design task (outside this implementation phase).
+> **About image updates**: The existing [`docs/assets/harness-plangate-readme-dark-v2.png`](docs/assets/harness-plangate-readme-dark-v2.png) is a v7-v8.6-era overview and remains valid. A new image reflecting the staged adoption levels and self-evolution frame finalized in v8.7.0 will be considered separately as a design task (outside this implementation phase).
 
 ## Current Status
 
