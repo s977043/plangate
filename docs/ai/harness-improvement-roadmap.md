@@ -61,14 +61,14 @@ PlanGate にはすでに以下が存在する。
 | **v8.7.0 主** | **段階的導入ガイド** | OSS 利用者の最大摩擦「どこまで使えばよいか不明」を解消する | Level 1-5 導入レベル / docs | 🔵 Open (v8.7.0 / #226) |
 | **v8.7.0 主** | **Plugin 成熟化** | 配布の確実性を機能思想より先に固める | 解決順 / prefix / 更新手順 | 🔵 Open (v8.7.0 / #224) |
 | **v8.7.0 主** | **バージョニング安定性ポリシー** | breaking vs additive を明文化、既存 artifact 互換を保証 | versioning-policy.md | 🔵 Open (v8.7.0 / #225) |
-| v8.7.0 副 | Run Outcome Review v1 | run 完了時の振り返りを軽量 markdown で標準化 | outcome-review.md template | 🔵 Open (v8.7.0 / 新規) |
+| v8.7.0 副 | Run Outcome Review v1 | run 完了時の振り返りを軽量 markdown で標準化 | outcome-review.md template | 🔵 Open (v8.7.0 / #228) |
 | v8.7.0 副 | Lightweight Plan Quality Checks | 計画の不足・リスク・前提・完了条件を軽量に構造化する | Plan Check / Risk Check / Done Check | 🔵 Open (v8.7.0 / #213) |
 | v8.7.0 副 | Harness Eval expansion | eval-runner をハーネス変更判断に使いやすくする | comparison / release gate 拡張 | 🔵 Open (v8.7.0 / #196) |
 | v8.7.0 副 | Tool Error Taxonomy | hook/tool failure の分類軸 | error taxonomy / recovery policy | 🔵 Open (v8.7.0 / #203) |
 | v8.7.0 副 | PlanGateBench Fixture | 評価対象固定 | fixture suite | 🔵 Open (v8.7.0 / #204) |
-| v8.7.0 実験 | Trace Timeline v1 (Experimental) | 観測基盤の最小実装、quickstart 非掲載 | schema 1.1 additive / timeline JSON | 🔵 Open (v8.7.0 / 新規) |
-| v8.8.0 | Dogfooding Eval v1 | PlanGate 自身を評価対象にする (single judge + human rationale) | eval suite / fixture | 🔵 Open (v8.8.0 / 新規) |
-| v8.8.0 | Gate Event Normalization | gate_id / phase / status の語彙正規化 | normalized schema | 🔵 Open (v8.8.0 / 新規) |
+| v8.7.0 実験 | Trace Timeline v1 (Experimental) | 観測基盤の最小実装、quickstart 非掲載 | schema 1.1 additive / timeline JSON | 🔵 Open (v8.7.0 / #229) |
+| v8.8.0 | Dogfooding Eval v1 | PlanGate 自身を評価対象にする (single judge + human rationale) | eval suite / fixture | 🔵 Open (v8.8.0 / #231) |
+| v8.8.0 | Gate Event Normalization | gate_id / phase / status の語彙正規化 | normalized schema | 🔵 Open (v8.8.0 / #230) |
 | v8.8.0 | Model Profile v2 | モデルごとの実行特性を表現する | edit interface / retry / capability | 🔵 Open (v8.8.0 / #197) ← v8.7.0 から押し出し |
 | v8.8.0 | Keep Rate | AI 成果物が残ったかを測る | code / plan / acceptance / handoff keep rate | 🔵 Open (v8.8.0 / #198) |
 | v8.9.0 候補 | Dynamic Context Engine | 契約コンテキストと作業コンテキストを分離する | context manifest / context command | 🔵 Open (v8.9.0 / #199) |
@@ -470,10 +470,10 @@ Level 4 (改善最適化):   適応 / 探索最適化
 - **Level 1**: plan 承認だけ
 - **Level 2**: handoff まで
 - **Level 3**: hooks / validate
-- **Level 4**: metrics / outcome review
-- **Level 5**: eval / timeline（self-evolution は Level 5）
+- **Level 4**: metrics / outcome review ← **自己進化軸は実質ここから開始**（Run Outcome Review v1 は自己進化軸の主役）
+- **Level 5**: eval / timeline（dogfooding eval / experimental timeline）
 
-初回導線（quickstart）に自己進化機能を混ぜない。
+初回導線（quickstart）に自己進化機能を混ぜない。Level 5 の機能は experimental / advanced 扱い。
 
 ### 13.5.4 意図的に切り捨てる軸（明示）
 
@@ -494,6 +494,8 @@ Level 4 (改善最適化):   適応 / 探索最適化
 - `trace_id` / `artifact_refs` / `policy_refs` は v8.8.0 以降に判断
 - `additionalProperties: false` と Metrics Privacy Policy (#202) は維持
 - 既存 1.0 event は後方互換で読める
+
+> **注 (steering-loop ログとの整合)**: `2026-05-14-steering-loop-codex.md` Round 2 の DoD 7 項目では `trace_id` を前提とした紐付け規則が記載されているが、Round 4 Devil's Advocate ラウンドで「schema を広げすぎる罠」を考慮し、v8.7.0 では `parent_event_id` のみで紐付けを成立させる方針に **修正済み**。`trace_id` の追加判断は v8.8.0 で再評価する。
 
 ### 13.5.6 OSS 価値整合（Round 5 確定）
 
