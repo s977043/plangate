@@ -20,6 +20,16 @@ status: draft
 | AC-7 working-context反映 | PASS | 「C-2 指摘の差分管理」節 + CONDITIONAL/FAIL フロー更新 |
 | AC-8 回帰なし | PASS | hook 48/0、§2〜4 無改変、doc 整合 |
 
+## 1-bis. V-3 外部レビュー対応（Codex major3→fix-loop / Gemini critical0）
+
+Codex=critical0/major3/minor2。critical なし＝設計方向は妥当。fix-loop で全反映:
+- MJ-1: CONDITIONAL の順序を EH-3/c3.json と整合固定（集約→1回確定→簡易C-1→
+  人間 APPROVED c3.json 発行→exec。発行は反映の後）
+- MJ-2: scripts/ai-dev-plan.sh の旧ルールを F5-C 整合へ（AC-7 完了）
+- MJ-3: 2レーンの coverage 穴を解消（コードベース整合→設計妥当性へAC候補返却）
+- minor: review-external 監査表 / #230 最小フィールド案
+再 V-1 PASS、hook 48/0。Gemini も承認境界不変を確認。
+
 ## 2. 既知課題一覧
 
 - #227 river-reviewer 標準 IF 本体 / #230 events / #200 集計の*実装*は本 PBI 外

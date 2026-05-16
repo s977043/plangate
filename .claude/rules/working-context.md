@@ -191,11 +191,16 @@ status.md / current-state.md が「進行中の情報管理」であるのに対
   都度マージしない＝版管理困難・監査性低下・反映コスト化を防ぐ）
 - 各指摘に **指摘ID `R-NNN`** を採番。指摘ゼロでも「指摘なし」を明示記録
   （監査連続性）
-- 計画本体（plan/todo/test-cases）への反映は **exec 開始時に 1 回だけ
-  確定反映**。反映コミットメッセージに `Refs: R-NNN` を記載し
-  「指摘ID → 反映コミット」を追跡可能にする
-- C-3=CONDITIONAL の指摘反映もこの 1 回確定に含め、plan_hash 再計算と
-  整合させる（EH-3 と矛盾しない運用）
+- 計画本体（plan/todo/test-cases）への反映は **1 回だけ確定**。順序を
+  EH-3 / `approvals/c3.json` と整合させ固定する（V-3 MJ-1）:
+  **(1) review-external に R-NNN 集約 → (2) 1 回確定反映 → (3) 簡易 C-1
+  再実行 → (4) 人間が最終 `c3.json`（`c3_status=APPROVED`・確定後 plan の
+  `plan_hash`）を発行 → (5) exec**。反映コミットに `Refs: R-NNN`。
+  c3.json 発行は確定反映の **後**（先に発行すると EH-3 が後続反映を
+  mismatch 検知するため。`bin/plangate exec` は APPROVED のみ受理）
+- 監査表（追記専用・squash/rebase 耐性）: review-external.md に
+  `| R-NNN | status | reflected_in(commit) | notes |` を持たせ、
+  指摘→反映の抜けを検出可能にする（V-3 minor）
 - 将来 #230（Gate Event Normalization）/ #200 と additive に events 連携
   （`review-finding → plan-revision` トレース）。本 PBI は ID+Refs まで
 
@@ -268,7 +273,7 @@ status.mdの更新タイミングと記載内容を段階で分ける:
 - `review-self.md`（C-1）と`review-external.md`（C-2）のレビュー結果を人間が確認
 - 三値で判断:
   - **APPROVE**: exec開始。status.mdに`## C-3 Gate: APPROVED`を記録
-  - **CONDITIONAL**: 指摘は review-external.md（追記専用・`R-NNN`）に集約済とし、**exec 開始時に 1 回だけ** plan/todo/test-cases へ確定反映（`Refs: R-NNN`）+ 簡易C-1再実行 → exec開始。status.mdに`## C-3 Gate: CONDITIONAL`を記録
+  - **CONDITIONAL**: review-external.md（`R-NNN`）集約済 → 1 回確定反映（`Refs: R-NNN`）→ 簡易C-1 → 人間が **APPROVED `c3.json`（確定後 plan_hash）発行** → exec開始。status.mdに`## C-3 Gate: CONDITIONAL`を記録（`bin/plangate exec` は APPROVED のみ受理）
   - **REJECT**: plan再生成。status.mdに`## C-3 Gate: REJECTED`を記録
 - C-2（`review-external.md`）は任意。C-2をスキップする場合はC-1のみで判断可
 - FAILが出た場合は指摘事項（review-external.md の `R-NNN`）を反映してplan.md / todo.md / test-cases.mdを再生成する（反映コミットに `Refs: R-NNN`）
