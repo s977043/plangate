@@ -61,7 +61,7 @@ UI/デザインタスクで追加指示の往復をゼロにするため、pbi-i
 
 ## Questions / Unknowns
 
-- UI タスク判定の自動推定 vs 手動宣言（S2 / C-3）
+- ~~UI判定~~ → **C-3確定: pbi-input の is_ui_task 人手宣言を基本 + 変更ファイル傾向の自動ヒントを補助警告**
 
 ## Mode判定
 
