@@ -20,12 +20,23 @@ status: draft
 | AC-7 #228 参照のみ | PASS | 「#228 を再定義せず参照」明記 |
 | AC-8 既定OFFで既存不変 | PASS | R は純追加・01〜05 不変・hook 48/0・doc 整合 lint 0 |
 
+## 1-bis. V-3 外部レビュー対応（Codex CONDITIONAL / Gemini PASS）
+
+Codex=CONDITIONAL APPROVE(critical0/major2/minor2)、Gemini=PASS。critical なし
+＝コード再作業不要。doc 明確化で反映:
+- MJ-1: 明示コマンドを将来CLI（未実装）と明記し正本起動方式から除外
+- MJ-2: opt-in 正本を C-3 承認済み pbi-input の retro_enabled のみに固定
+  （plan_hash/EH-3 が AI 自己付与を阻止）
+- minor: README 純追加性明記 / seeds フルパス統一
+再 V-1 PASS、hook 48/0。
+
 ## 2. 既知課題一覧
 
 - 06_retro.md / retro-phase.md は CI markdownlint スコープ外を含む
   （docs/workflows は対象・lint 0 確認済、docs/ai は非対象）。
-- opt-in 起動の*実装*（コマンド `retro` サブコマンド・メタ読取）は本 PBI で
-  仕様正本化。CLI 実装は後続（spec 準拠で別 PBI / V2）。
+- opt-in 起動の*実装*（`retro` サブコマンド CLI）は**後続 PBI**（V-3 MJ-1 で
+  正本起動方式から除外明記）。現行の opt-in は C-3 承認済み pbi-input の
+  `retro_enabled: true` のみ（人間 C-3 が唯一の opt-in 根拠）。
 
 ## 3. V2 候補
 

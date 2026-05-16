@@ -42,7 +42,14 @@ PlanGate（統制の外殻）の内側で動作する **実行層（Execution Ar
 5. implementation-agent  が WF-04 で実装
 6. qa-reviewer           が WF-05 で要件照合
 7. orchestrator          が WF-05 handoff を出す
-8. （opt-in のみ）retrospective-analyst が WF-06 で振り返りドラフト → 人間 confirm/skip
+```
+
+> 標準 run は **1〜7 で完結**。下記 8（WF-06）は **opt-in append**（既定 OFF・
+> C-3 承認済み pbi-input の `retro_enabled: true` 時のみ）。標準フローの一部
+> ではない。
+
+```text
+8. （opt-in のみ・標準外）retrospective-analyst が WF-06 で振り返りドラフト → 人間 confirm/skip
 ```
 
 ## PlanGate 既存フェーズとの対応表

@@ -10,12 +10,11 @@ run（PBI/TASK）完了時に振り返りドラフトを生成し、改善ネタ
 
 ## opt-in 起動（既定 OFF）
 
-本フェーズは **既定で発火しない**。以下いずれかが明示された場合のみ起動:
-
-- 明示コマンド: `/ai-dev-workflow TASK-XXXX retro`
-- pbi-input メタ: `retro_enabled: true`
-
-env による有効化は採用しない（自己付与リスク回避 / TASK-0071 教訓）。
+本フェーズは **既定で発火しない**。正本の opt-in source は
+**C-3 承認済み pbi-input の `retro_enabled: true`** のみ
+（[`docs/ai/retro-phase.md`](../ai/retro-phase.md) §1）。
+明示コマンド `/ai-dev-workflow TASK-XXXX retro` は**将来 CLI（未実装）**で
+現時点の正本起動方式ではない。env による有効化は採用しない。
 未指定 run は WF-05 handoff で完了し、本フェーズは存在しないものとして扱う。
 
 ## 入力
@@ -30,7 +29,7 @@ env による有効化は採用しない（自己付与リスク回避 / TASK-00
   効いた skill・gate・artifact / 1 人運用で負荷が高かった箇所）
 - ドラフトは **スコアリング（良し悪し判定）を含まない**（#231 judge と責務非重複）
 - 人間が 1 行で confirm / skip している
-- confirm 時、`improvement-seeds.md` に append-only で 1 エントリ追記されている
+- confirm 時、`docs/working/improvement-seeds.md` に append-only で 1 エントリ追記されている
 - skip 時、seeds 追記なしで run は正常終了している
 
 ## 呼び出す Skill
@@ -44,7 +43,7 @@ env による有効化は採用しない（自己付与リスク回避 / TASK-00
 
 ## 次への引き継ぎ
 
-- artifact: **improvement-seeds**（append-only、run またぎ累積）
+- artifact: **improvement-seeds**（`docs/working/improvement-seeds.md`、append-only、run またぎ累積）
 - 受け取り先: #200 期間集計 CLI（improvement-seeds.md を入力源に吸い上げ）
 
 ## 制約（Rule 1 準拠）
