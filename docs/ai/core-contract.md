@@ -87,8 +87,15 @@
 - 委譲可能なら conductor 委譲（並列性・責務分離の最適化）、不可なら
   **メイン/単一エージェントによる直接 Implementer 実行が既定の正規フロー**。
   フォールバックは例外ではなく既定経路であり、人間介入を要しない。
-- 本不変条件は Iron Law を弱めない。conductor の「実装しない」原則は
-  委譲可能環境では不変。降格は委譲不能環境に限定される。
+- **委譲不可時の direct-implementer-mode は exec router の責務**（conductor 内で
+  判定しない。conductor は委譲可能時のみ起動）。router 自身が implementer として
+  タスク分割・依存順序・status/todo 更新・L-0〜V-4・PR を担う。
+- **direct-implementer-mode でも統制は不変**: C-3 承認 / plan_hash 検証 /
+  allowed_files / scope 外停止（Iron Law #2）/ todo・status 更新 / L-0〜V-4 /
+  C-4 はすべて適用される。直接実行は実行トポロジの変更であって統制の緩和では
+  ない（統制回避の口実にしてはならない。Codex V-3 MJ-2）。
+- 本不変条件は Iron Law を弱めない。conductor の「実装しない」原則は不変
+  （conductor は委譲可能環境でのみ起動されるため衝突しない。Codex V-3 MJ-3）。
 
 ## 6. Available evidence
 
