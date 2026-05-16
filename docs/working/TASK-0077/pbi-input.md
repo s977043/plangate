@@ -57,6 +57,12 @@ Hardening）と責務が交差するため境界整理も必要。
 - [ ] AC-5: 承認境界後退リスクと緩和（reject 巻き戻し・監査・opt-in 既定 OFF）が明記される
 - [ ] AC-6: #213 Plan Health / #226 段階導入ガイドとの接続点が定義される
 - [ ] AC-7: 実装は C-3 承認後の別 phase とすることが明記され、計画段階で停止する
+- [ ] AC-8: 判定不能/根拠不足/Plan Health 未算出/新規設計曖昧 → **必ず Standard・同期 C-3** に倒す不変条件が定義される（Lite は証明可能時のみ。C-2 R-001）
+- [ ] AC-9: C-3 降格 reject 時の巻き戻し対象が具体化される（実装ブランチ破棄 / PR close / 成果物 invalidation / 監査ログ記録 / 派生成果物の扱い。C-2 R-002）
+- [ ] AC-10: TASK-0071 hardening 抵触時（Shadow Config/承認境界/責務4分類/Critical Infra 指定）は Lite/降格を**無効化し Standard/同期を強制**する上位優先ルール（Hardening Override）が定義される（C-2 R-003 / Gemini）
+- [ ] AC-11: Lite は mode-classification 内包（`lite_eligible` 下位属性）。`critical` は原則 Lite 不可・例外は人間 C-3 明示承認（C-2 R-004）
+- [ ] AC-12: Lite の「外部レビュー 1 本」は critical/major=0 を要求し観点固定であることが定義される（C-2 R-005）
+- [ ] AC-13: 本 PBI の diff に rules/scripts/bin の実装変更が含まれたら C-1 FAIL とする機械ガードが完了条件に入る（C-2 R-006・計画停止の歯止め）
 
 ## Notes from Refinement
 

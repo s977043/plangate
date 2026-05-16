@@ -60,12 +60,20 @@ status: draft
   Files は計画ドキュメントのみ
 - R2: 承認境界後退 → opt-in 既定 OFF / reject 巻き戻し / 監査 を設計の
   不変前提として明記（AC-5）
-- R3: TASK-0071 と二重定義 → AC-4 で責務境界表を作成
+- R3: TASK-0071 と二重定義 → AC-4 + **AC-10 Hardening Override**（TASK-0071
+  抵触時 Lite/降格 無効化・Standard/同期強制）で上位優先を固定
+- R4: Lite 誤適用 → **AC-8 判定不能は必ず Standard**（証明可能時のみ Lite）
+- R5: 非同期降格が事後追認化 → **AC-9 reject 巻き戻し具体化**（ブランチ破棄/
+  PR close/成果物 invalidation/監査記録）
+- R6: 計画が実装に滲む → **AC-13 機械ガード**（diff に rules/scripts/bin
+  実装変更 → C-1 FAIL）
 
 ## Questions / Unknowns
 
 - Lite が mode-classification の直交軸か内包か（S2 / C-3）
 - C-3 降格の既定値・適用条件の厳格度（S3 / C-3）
+- （C-2 R-001〜006 は AC-8〜13 として確定反映済。C-3 で承認境界可変化の
+  是非とともに最終判断）
 
 ## Mode判定
 
