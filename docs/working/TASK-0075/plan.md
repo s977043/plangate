@@ -66,8 +66,8 @@ opt-in 終端フェーズ R を定義する。承認境界（人間 confirm/skip
 
 ## Questions / Unknowns
 
-- opt-in フラグの具体形（env / config / pbi-input メタ / コマンドオプション）→ C-3
-- improvement-seeds.md スキーマ粒度（最小フィールド集合）→ C-3
+- ~~opt-inフラグ形~~ → **C-3確定: 明示コマンド `/ai-dev-workflow TASK-X retro` + pbi-input メタ `retro_enabled: true` の併用（env 不使用・既定OFF）**
+- ~~seedsスキーマ粒度~~ → **C-3確定: 最小 `{date, task_id, items{5項目}, confirmed_by}` append-only**
 
 ## Mode判定
 
@@ -80,4 +80,4 @@ opt-in 終端フェーズ R を定義する。承認境界（人間 confirm/skip
 - リスク: 高（フロー定義だが opt-in・既定OFF・純追加で影響限定）
 - 例外: ワークフロー定義変更 → critical 相当だが opt-in/既定OFF/純追加で
   影響を限定でき high-risk に留める（C-3 で最終確定）
-- **最終判定**: high-risk（V-3 必須・V-4 スキップ。C-3 で critical 格上げ可）
+- **最終判定（C-3確定）**: **high-risk**（opt-in/既定OFF/純追加で影響限定）。V-3 必須・V-4 スキップ
