@@ -72,7 +72,7 @@ TASK-0071 D-1 確定の第1スライス（S1+S2）。
 
 ## Questions / Unknowns
 
-- タスクロックの強制層（hook EH-x / doctor exit / workflow 完了条件）→ C-3
+- ~~タスクロック強制層~~ → **C-3確定: doctor --check-settings 連動 + workflow DoD（05_verify_and_handoff）併用。新規Hook増やさず既存ゲート機構に乗せる**
 - 適用 script の配置（scripts/ 直下 or bin 連携）→ S1 で確定
 
 ## Mode判定
