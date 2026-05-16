@@ -16,6 +16,14 @@ UI/デザイン変更が主目的の PBI で「踏襲元曖昧 / 配置・レス
   「UI タスクの可能性。Design/UI Addendum を確認」と**警告（強制しない）**
 - 自動のみに依存しない（誤判定でゲート回避/過剰要求の双方を生むため）
 
+> **スコープ注記（V-3 major 反映）**: 本 PBI（F3 / TASK-0074）は
+> **テンプレ + spec の整備まで**。自動ヒント警告の*実装*（変更ファイル傾向
+> 検出 → plan/レビュー時 or `plangate` 検査での警告出力）は**後続 TASK**
+> とする。それまで「ゲート回避防止」は人手宣言 + レビュー時の本 spec 参照に
+> 依存する（強制ではなくソフト誘導。#236 の一律必須化回避方針と一貫）。
+> 後続 AC 候補: 「UI 層中心変更で is_ui_task:false の場合に警告を出す検査の
+> 実装」。
+
 ## 3. 真実源（source of truth）分岐
 
 ```text
@@ -56,7 +64,7 @@ Figma なし案件のゲート回避も防ぐ。
 
 solution-architect が design.md を書く際、UI タスクなら「視覚設計」
 セクション（[`docs/working/templates/design.md`](../working/templates/design.md)）
-に Addendum 4〜6 を反映する。pbi-input（要求）→ design.md（設計）→
+に Addendum の必須フィールド全体（1〜7）を反映する。pbi-input（要求）→ design.md（設計）→
 受入（証跡）で視覚要件が一貫する。
 
 ## 7. 関連

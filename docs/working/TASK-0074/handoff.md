@@ -20,12 +20,21 @@ status: draft
 | AC-7 design.md整合 | PASS | templates/design.md §1-bis 視覚設計セクション |
 | AC-8 既存出力非破壊 | PASS | init で Why/What/AC/Estimation 不変、hook 48/0 |
 
+## 1-bis. V-3 外部レビュー対応（Codex CONDITIONAL / Gemini 出力不全）
+
+Codex=CONDITIONAL(critical0/major1/minor1)。Gemini は skill 競合で実質出力なし
+→ Codex 主体。critical なし＝コード再作業不要。doc 明確化のみで反映:
+- major: 自動ヒント警告の*実装*は本 PBI スコープ外（テンプレ+spec まで）を
+  spec に明記。後続 TASK + 後続 AC 候補を記載。ゲート回避防止は当面ソフト誘導
+- minor: 「design.md に Addendum 4〜6」→「必須フィールド全体(1〜7)」へ修正
+heredoc 破壊リスク=Codex 確認で問題なし（init 生成物のバッククォート正常）。
+
 ## 2. 既知課題一覧
 
 - docs/ai/design-ui-addendum.md は CI markdownlint スコープ外（docs/ai 非対象）。
   ローカルで MD040 修正済（```text）。
-- 自動ヒント（UI 層変更検出）は警告のみ・未実装の検出ロジックは V2 候補
-  （現状は spec 上の方針定義。plan メタ連携は別 PBI）。
+- **自動ヒント警告の実装は本 PBI スコープ外（V-3 major で明示）**。spec に
+  後続 TASK + 後続 AC 候補を記載。当面ゲート回避防止はソフト誘導依存。
 
 ## 3. V2 候補
 
