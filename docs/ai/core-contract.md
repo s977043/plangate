@@ -73,7 +73,9 @@
 | テストが FAIL | Iron Law #6 により root cause 調査、症状抑制で済ませない |
 | バージョンや事実が不明 | 推測せず最新 doc / 既存コード / git history を確認 |
 | 同じ tool call を rejected された | 同じ呼び出しを再試行しない、ユーザーに理由を確認 |
-| 委譲不可 / 委譲境界 `no-commit` 違反 / 認証三点不整合 | §5-bis-1 exec 前プリフライト（単一正本）で決定論的に停止 or direct-implementer-mode 降格。自然言語依存にしない |
+| 委譲不可（`delegation_unavailable`）| §5-bis-1: **direct-implementer-mode へ自動降格**（人間介入不要）|
+| 委譲境界 `no-commit` 違反 | §5-bis-1: EH-9 **block**（default=block、降格しない）|
+| 認証三点不整合 | §5-bis-1: auth-preflight **exit!=0 で exec 前停止**（降格しない）|
 
 ## 5-bis. 実行環境不変条件（Execution Environment Invariant）
 
@@ -115,7 +117,9 @@ exec 前に停止 or 明示降格する:
 3. **委譲 commit 境界の機械検出（EH-9）**: 宣言下の git commit/push 相当
    （`git -c`/`-C`/env 前置/`command git`/`gh pr merge`/`sh -c` 等を含む）は
    **EH-9**（[`contracts/hook-enforcement.md` 系](./hook-enforcement.md)）が
-   PreToolUse で **default=block**（bypass・未宣言のみ従来動作）。信頼境界は
+   PreToolUse で **default=block**（**warn は廃止＝high-risk 恒久対処**。
+   bypass・未宣言のみ従来動作）。違反は block であり direct-mode 降格は
+   しない（降格は項目1の `delegation_unavailable` に限定）。信頼境界は
    stdin JSON `tool_input.command` を正本、env は CLI テスト専用。
    **配線契約**: 委譲元 orchestrator が todo.md メタを読み委譲時に
    `PLANGATE_DELEGATION_NOCOMMIT=1` を注入する責務を負う。
@@ -124,7 +128,8 @@ exec 前に停止 or 明示降格する:
    （env 注入漏れ・解決不能 git alias 等の最終防線）。
 5. **認証三点プリフライト**: `check-auth-preflight.sh`（gh active /
    git config user.email / origin。`PLANGATE_EXPECTED_GH_ACCOUNT` 指定時は
-   厳格一致）が exec 前に決定論検証し、不整合は exit!=0 で停止。
+   厳格一致）が exec 前に決定論検証し、不整合は **exit!=0 で停止**
+   （降格はしない＝項目1の `delegation_unavailable` のみ direct-mode）。
 
 #### Error taxonomy（最小定義・将来 #203 統合）
 

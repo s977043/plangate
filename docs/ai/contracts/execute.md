@@ -9,7 +9,7 @@
 ### 実行者の決定（exec 前プリフライト）
 
 exec 開始時の実行者決定・委譲 commit 境界・認証整合の検証は
-[`core-contract.md` §5-bis / §5-bis-1（exec 前プリフライト 単一正本）](../core-contract.md#5-bis-実行環境不変条件execution-environment-invariant)
+[`core-contract.md` §5-bis-1（exec 前プリフライト 単一正本）](../core-contract.md)（§5-bis 実行環境不変条件 → §5-bis-1 exec 前プリフライト）
 に従う（capability 判定 → conductor 委譲 or direct-implementer-mode /
 委譲 commit 境界 EH-9 / 認証三点プリフライト / exec 後検証 / 2 段委譲を
 ハード前提にしない不変条件）。本契約は exec phase での適用点のみを示す。

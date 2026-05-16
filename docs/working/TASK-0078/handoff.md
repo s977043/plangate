@@ -19,6 +19,16 @@ status: done
 | AC-6 回帰なし | PASS | hook 78 passed/0 failed（挙動不変） |
 | AC-7 F2 handoff 更新 | PASS | TASK-0073 handoff 既知課題を「統合完了」に更新 |
 
+## 1-bis. V-3 外部レビュー対応（Codex major1/Gemini APPROVED）
+
+Codex=critical0/major1/minor2、Gemini=APPROVED。挙動不変要件のため Codex major
+を反映:
+- MJ-1: 統合 Decision-rule を3分離（delegation_unavailable=direct降格 /
+  EH-9=block / auth=exit!=0停止）。移設前の挙動を厳密維持
+- mn-1: 「warn 廃止＝high-risk 恒久対処」を §5-bis-1 に復元（情報無損失）
+- mn-2: execute.md リンク §5-bis-1 明示
+再 V-1 PASS、hook 78/0、scripts 不変。Gemini も無損失/挙動不変を確認。
+
 ## 2. 既知課題一覧
 
 - なし（本 PBI は技術的負債（暫定二重定義）の解消そのもの）。
