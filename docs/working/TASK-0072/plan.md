@@ -36,7 +36,7 @@ exec フェーズの実行者を実行環境のケイパビリティで分岐し
 | Step | 内容 | Output | Owner | Risk | 🚩 |
 |------|------|--------|-------|------|----|
 | S1 | 現状調査: exec 系 workflow 定義 / core-contract / conductor agent / 既存 error 分類の所在特定 | 調査メモ | agent | low | - |
-| S2 | ケイパビリティ判定方式の意思決定（環境変数 / ツール存在検査 / プリフライト探索）→ C-3 上申 | design note | agent | high | 🚩C-3判断 |
+| S2 | ケイパビリティ判定=**ツール存在検査**で実装（C-3確定済、design note不要） | 実装方針 | agent | med | - |
 | S3 | exec フロー定義を分岐+フォールバック既定へ改訂 | workflow 差分 | agent | high | 🚩AC-2/AC-3 |
 | S4 | core-contract 不変条件追加（2段委譲必須禁止） | contract 差分 | agent | crit | 🚩AC-4 |
 | S5 | error taxonomy に delegation_unavailable + recovery 定義 | taxonomy 差分 | agent | med | 🚩AC-5 |
@@ -70,8 +70,8 @@ exec フェーズの実行者を実行環境のケイパビリティで分岐し
 
 ## Questions / Unknowns
 
-- ケイパビリティ判定の正規手段（S2 / C-3 判断）
-- error taxonomy の正本配置（#203 未着手なら本 PBI で最小定義を新設するか）→ C-3
+- ~~ケイパビリティ判定の正規手段~~ → **C-3 確定: ツール存在検査**（exec 開始時に Task 利用可否を実行時検出。判定不能時は安全側=直接実行）
+- ~~error taxonomy 正本配置~~ → **C-3 確定: 本 PBI で delegation_unavailable 最小定義を新設、将来 #203 へ統合**
 
 ## Mode判定
 
