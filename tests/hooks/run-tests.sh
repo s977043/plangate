@@ -248,56 +248,56 @@ else
   fail=$((fail + 1))
 fi
 
-# ---- check-delegation-commit-boundary.sh (EH-9 / TASK-0073 F2) ----
-note "check-delegation-commit-boundary.sh (EH-9)"
+# ---- check-delegation-commit-boundary.sh (EH-9 / TASK-0073 F2, V-3 hardened) ----
+note "check-delegation-commit-boundary.sh (EH-9, hardened)"
 
-# 境界宣言なし → allow（誤検出ゼロ）
-out=$(PLANGATE_HOOK_CMD="git commit -m x" sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
-if [ "$rc" -eq 0 ] && printf '%s' "$out" | grep -q '"continue":true'; then
-  printf '[PASS] EH-9: no boundary → allow\n'; pass=$((pass + 1))
-else
-  printf '[FAIL] EH-9: no boundary (rc=%d out=%s)\n' "$rc" "$out"; fail=$((fail + 1))
-fi
+eh9() { printf '{"tool_input":{"command":"%s"}}' "$1" | PLANGATE_DELEGATION_NOCOMMIT=1 sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>/dev/null; }
 
-# 境界宣言あり + commit + strict → block
-out=$(PLANGATE_DELEGATION_NOCOMMIT=1 PLANGATE_HOOK_STRICT=1 PLANGATE_HOOK_CMD="git commit -m x" sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
-if printf '%s' "$out" | grep -q '"continue":false'; then
-  printf '[PASS] EH-9: boundary+commit strict → block\n'; pass=$((pass + 1))
-else
-  printf '[FAIL] EH-9: boundary strict block (out=%s)\n' "$out"; fail=$((fail + 1))
-fi
-
-# 境界宣言あり + commit + default → warn(allow)
-out=$(PLANGATE_DELEGATION_NOCOMMIT=1 PLANGATE_HOOK_CMD="git push" sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
-if printf '%s' "$out" | grep -q '"continue":true' && printf '%s' "$out" | grep -q 'WARNING'; then
-  printf '[PASS] EH-9: boundary+push default → warn+allow\n'; pass=$((pass + 1))
-else
-  printf '[FAIL] EH-9: boundary default warn (out=%s)\n' "$out"; fail=$((fail + 1))
-fi
-
-# 境界あり + 無害コマンド → allow
-out=$(PLANGATE_DELEGATION_NOCOMMIT=1 PLANGATE_HOOK_CMD="ls -la" sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
+# 未宣言 → allow（誤検出ゼロ）
+out=$(printf '{"tool_input":{"command":"git commit -m x"}}' | sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>/dev/null)
 if printf '%s' "$out" | grep -q '"continue":true'; then
-  printf '[PASS] EH-9: boundary+innocuous → allow\n'; pass=$((pass + 1))
-else
-  printf '[FAIL] EH-9: boundary innocuous (out=%s)\n' "$out"; fail=$((fail + 1))
-fi
+  printf '[PASS] EH-9: undeclared → allow\n'; pass=$((pass+1))
+else printf '[FAIL] EH-9 undeclared (%s)\n' "$out"; fail=$((fail+1)); fi
 
-# bypass > strict
-out=$(PLANGATE_BYPASS_HOOK=1 PLANGATE_DELEGATION_NOCOMMIT=1 PLANGATE_HOOK_STRICT=1 PLANGATE_HOOK_CMD="git commit" sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
+# CR-1 回避ベクタ群 → すべて block（宣言下 default=block）
+for v in "git commit -m x" "git -c user.name=x commit" "command git commit" "GIT_AUTHOR_NAME=x git commit" "git -C /tmp commit" "git push origin x" "git ci" "gh pr merge 9" "sh -c 'git commit'"; do
+  out=$(eh9 "$v")
+  if printf '%s' "$out" | grep -q '"continue":false'; then
+    printf '[PASS] EH-9 CR-1: blocks [%s]\n' "$v"; pass=$((pass+1))
+  else printf '[FAIL] EH-9 CR-1 bypass [%s] (%s)\n' "$v" "$out"; fail=$((fail+1)); fi
+done
+
+# 無害コマンド → allow（誤検出なし）
+for ok in "ls -la" "git status" "git diff"; do
+  out=$(eh9 "$ok")
+  if printf '%s' "$out" | grep -q '"continue":true'; then
+    printf '[PASS] EH-9: innocuous allow [%s]\n' "$ok"; pass=$((pass+1))
+  else printf '[FAIL] EH-9 false-positive [%s] (%s)\n' "$ok" "$out"; fail=$((fail+1)); fi
+done
+
+# bypass > 宣言
+out=$(printf '{"tool_input":{"command":"git commit"}}' | PLANGATE_BYPASS_HOOK=1 PLANGATE_DELEGATION_NOCOMMIT=1 sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>/dev/null)
 if printf '%s' "$out" | grep -q '"continue":true'; then
-  printf '[PASS] EH-9: bypass overrides strict\n'; pass=$((pass + 1))
-else
-  printf '[FAIL] EH-9: bypass (out=%s)\n' "$out"; fail=$((fail + 1))
-fi
+  printf '[PASS] EH-9: bypass overrides\n'; pass=$((pass+1))
+else printf '[FAIL] EH-9 bypass (%s)\n' "$out"; fail=$((fail+1)); fi
 
-# stdin JSON fallback
-out=$(printf '{"tool_input":{"command":"git push origin x"}}' | PLANGATE_DELEGATION_NOCOMMIT=1 PLANGATE_HOOK_STRICT=1 sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
+# CR-2: stdin が正本（env で検査対象ずらし不可）— stdin=git commit, env=true
+out=$(printf '{"tool_input":{"command":"git commit -m x"}}' | PLANGATE_DELEGATION_NOCOMMIT=1 PLANGATE_HOOK_CMD="true" sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>/dev/null)
 if printf '%s' "$out" | grep -q '"continue":false'; then
-  printf '[PASS] EH-9: stdin JSON command → block\n'; pass=$((pass + 1))
-else
-  printf '[FAIL] EH-9: stdin JSON (out=%s)\n' "$out"; fail=$((fail + 1))
-fi
+  printf '[PASS] EH-9 CR-2: stdin canonical (env spoof ineffective)\n'; pass=$((pass+1))
+else printf '[FAIL] EH-9 CR-2 stdin not canonical (%s)\n' "$out"; fail=$((fail+1)); fi
+
+# ---- check-auth-preflight.sh (F2 / #239 問題3) ----
+note "check-auth-preflight.sh (auth preflight)"
+sh "$HOOKS_DIR/check-auth-preflight.sh" >/dev/null 2>&1 && rc=0 || rc=$?
+if [ "$rc" -eq 0 ]; then printf '[PASS] auth-preflight: valid env → exit 0\n'; pass=$((pass+1));
+else printf '[INFO] auth-preflight rc=%d (env依存・CI では skip 容認)\n' "$rc"; fi
+PLANGATE_EXPECTED_GH_ACCOUNT="zzz-nonexistent" sh "$HOOKS_DIR/check-auth-preflight.sh" >/dev/null 2>&1 && rc=0 || rc=$?
+if [ "$rc" -ne 0 ]; then printf '[PASS] auth-preflight: expected mismatch → exit!=0\n'; pass=$((pass+1));
+else printf '[FAIL] auth-preflight: mismatch not detected\n'; fail=$((fail+1)); fi
+PLANGATE_BYPASS_HOOK=1 PLANGATE_EXPECTED_GH_ACCOUNT="zzz" sh "$HOOKS_DIR/check-auth-preflight.sh" >/dev/null 2>&1 && rc=0 || rc=$?
+if [ "$rc" -eq 0 ]; then printf '[PASS] auth-preflight: bypass → exit 0\n'; pass=$((pass+1));
+else printf '[FAIL] auth-preflight bypass\n'; fail=$((fail+1)); fi
 
 # ---- Setup fixtures for EH-4 / EH-5 / EH-6 (Issue #169 Session B) ----
 TC_OK_NAME="TASK-HOOKTEST09"

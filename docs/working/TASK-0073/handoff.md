@@ -19,6 +19,13 @@ status: draft
 | AC-6 決定論挙動 | PASS | EH-9 strict=block/default=warn/bypass・未宣言=従来動作 |
 | AC-7 回帰なし | PASS | hook 54/0、CI lint 0 |
 
+## 1-bis. V-3 fix-loop（Codex REJECT→修正完了 / Gemini 出力不全）
+
+Codex V-3=REJECT(Critical2/Major4)。Gemini は skill 競合で実質出力なし→Codex 主体。
+fix-loop で CR-1(EH-9堅牢化:回避形網羅)/CR-2(stdin正本化)/MJ-1(配線契約)/
+MJ-2(check-auth-preflight.sh 新設)/MJ-3(default=block)/MJ-4(JSONエスケープ)/
+Minor(audit抑制)を全反映。再 V-1: hook 66/0、AC 全 PASS。
+
 ## 2. 既知課題一覧
 
 - **EH-9 の settings wiring は Claude 適用不可**（TASK-0070 self-mod ガード教訓）。
@@ -27,9 +34,13 @@ status: draft
   `sh ${CLAUDE_PROJECT_DIR}/scripts/hooks/check-delegation-commit-boundary.sh`
   を追加（env `PLANGATE_DELEGATION_NOCOMMIT` を委譲時に設定）。未適用でも
   exec 後検証ステップ（二段目）で検出可能。
-- core-contract §5-bis は F1（PR #245）にのみ存在。本 PBI は §5-bis への
-  ダングリング参照を避け自己完結。**#245 マージ後に execute.md プリフライトを
-  §5-bis 配下の単一ゲートへ統合**（重複排除）が follow-up。
+- core-contract §5-bis は F1（PR #245）にのみ存在。本 PBI は自己完結。
+  **#245 マージ後の統合方針（正本/削除の明示）**: 統合後の正本＝
+  core-contract §5-bis（capability + auth + commit境界を単一プリフライト節に
+  集約）。execute.md の F2 暫定節は §5-bis へ移設し**削除**する。EH-9 /
+  check-auth-preflight.sh の実装は不変（参照先のみ §5-bis に一本化）。
+- ユーザー定義 git alias は EH-9 で解決不能（残存制約）。exec 後検証
+  （todo.md メタ直読・fail-closed）がバックストップ。
 
 ## 3. V2 候補
 

@@ -73,7 +73,7 @@
 | テストが FAIL | Iron Law #6 により root cause 調査、症状抑制で済ませない |
 | バージョンや事実が不明 | 推測せず最新 doc / 既存コード / git history を確認 |
 | 同じ tool call を rejected された | 同じ呼び出しを再試行しない、ユーザーに理由を確認 |
-| 委譲境界 `no-commit` 下で commit/push 試行、または認証三点不整合 | exec 前プリフライトで決定論的に停止 or 降格（[`contracts/execute.md`](./contracts/execute.md) F2 / EH-9）。自然言語依存にしない |
+| 委譲境界 `no-commit` 下で commit/push 試行、または認証三点不整合 | exec 前プリフライトで決定論的に停止（EH-9 default=block / auth-preflight exit!=0。[`contracts/execute.md`](./contracts/execute.md) F2）。自然言語依存にしない |
 
 ## 6. Available evidence
 
