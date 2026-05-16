@@ -325,6 +325,48 @@ else
   printf '[SKIP] EH-3 P4d TC-8: dash not installed\n'
 fi
 
+# TC-9: case-insensitive plan.md (macOS case-insensitive FS bypass) → BLOCK
+out=$(PLANGATE_HOOK_FILE=docs/working/T/PLAN.md sh "$HOOKS_DIR/check-plan-hash.sh" 2>&1) && rc=0 || rc=$?
+if [ "$rc" -eq 2 ] && printf '%s' "$out" | grep -q BLOCK; then
+  printf '[PASS] EH-3 P4d TC-9: PLAN.md (uppercase) → BLOCK\n'; pass=$((pass + 1))
+else
+  printf '[FAIL] EH-3 P4d TC-9: uppercase bypass (rc=%d, out=%s)\n' "$rc" "$out"; fail=$((fail + 1))
+fi
+
+# TC-10: trailing-space path evasion → BLOCK
+out=$(PLANGATE_HOOK_FILE="docs/working/T/plan.md " sh "$HOOKS_DIR/check-plan-hash.sh" 2>&1) && rc=0 || rc=$?
+if [ "$rc" -eq 2 ] && printf '%s' "$out" | grep -q BLOCK; then
+  printf '[PASS] EH-3 P4d TC-10: trailing-space plan.md → BLOCK\n'; pass=$((pass + 1))
+else
+  printf '[FAIL] EH-3 P4d TC-10: trailing-space evasion (rc=%d, out=%s)\n' "$rc" "$out"; fail=$((fail + 1))
+fi
+
+# TC-11: sed-greedy JSON injection — real file is plan.md, decoy later → BLOCK
+inj='{"tool_input":{"file_path":"docs/working/T/plan.md"},"x":"\"file_path\": \"safe.txt\""}'
+out=$(printf '%s' "$inj" | sh "$HOOKS_DIR/check-plan-hash.sh" 2>&1) && rc=0 || rc=$?
+if [ "$rc" -eq 2 ] && printf '%s' "$out" | grep -q BLOCK; then
+  printf '[PASS] EH-3 P4d TC-11: JSON-injection decoy → still BLOCK\n'; pass=$((pass + 1))
+else
+  printf '[FAIL] EH-3 P4d TC-11: JSON injection bypass (rc=%d, out=%s)\n' "$rc" "$out"; fail=$((fail + 1))
+fi
+
+# TC-12: leading ./ normalization → BLOCK
+out=$(PLANGATE_HOOK_FILE=./plan.md sh "$HOOKS_DIR/check-plan-hash.sh" 2>&1) && rc=0 || rc=$?
+if [ "$rc" -eq 2 ] && printf '%s' "$out" | grep -q BLOCK; then
+  printf '[PASS] EH-3 P4d TC-12: ./plan.md → BLOCK\n'; pass=$((pass + 1))
+else
+  printf '[FAIL] EH-3 P4d TC-12: leading ./ (rc=%d, out=%s)\n' "$rc" "$out"; fail=$((fail + 1))
+fi
+
+# TC-13: valid JSON with canonical tool_input.file_path=plan.md + decoy file_path → BLOCK
+inj13='{"tool_input":{"file_path":"docs/working/T/plan.md"},"meta":{"file_path":"safe.txt"}}'
+out=$(printf '%s' "$inj13" | sh "$HOOKS_DIR/check-plan-hash.sh" 2>&1) && rc=0 || rc=$?
+if [ "$rc" -eq 2 ] && printf '%s' "$out" | grep -q BLOCK; then
+  printf '[PASS] EH-3 P4d TC-13: canonical tool_input.file_path wins over decoy → BLOCK\n'; pass=$((pass + 1))
+else
+  printf '[FAIL] EH-3 P4d TC-13: greedy decoy bypass (rc=%d, out=%s)\n' "$rc" "$out"; fail=$((fail + 1))
+fi
+
 # ---- Setup fixtures for EH-4 / EH-5 / EH-6 (Issue #169 Session B) ----
 TC_OK_NAME="TASK-HOOKTEST09"
 TC_NONE_NAME="TASK-HOOKTEST10"

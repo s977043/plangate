@@ -56,9 +56,21 @@ target_file=${PLANGATE_HOOK_FILE:-${2:-}}
 if [ -z "$target_file" ] && [ ! -t 0 ]; then
   _stdin=$(cat 2>/dev/null || true)
   if [ -n "$_stdin" ]; then
-    target_file=$(printf '%s' "$_stdin" \
-      | sed -n 's/.*"file_path"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
-      | head -1)
+    # V-3/Gemini 指摘: sed の貪欲マッチは「最後の "file_path"」を拾い、
+    # 偽プロパティ注入で plan.md 判定を回避され得る。jq で正規パス
+    # (.tool_input.file_path) を優先抽出し、無ければ「最初に出現する」
+    # file_path を grep -o（非貪欲・出現順）で取得する。
+    if command -v jq >/dev/null 2>&1; then
+      target_file=$(printf '%s' "$_stdin" \
+        | jq -r '.tool_input.file_path // .file_path // empty' 2>/dev/null \
+        | head -1)
+    fi
+    if [ -z "$target_file" ]; then
+      target_file=$(printf '%s' "$_stdin" \
+        | grep -o '"file_path"[[:space:]]*:[[:space:]]*"[^"]*"' \
+        | head -1 \
+        | sed 's/.*"\([^"]*\)"$/\1/')
+    fi
   fi
 fi
 
@@ -69,7 +81,11 @@ fi
 #     check-forbidden-files.sh と同じ「no task→skip」慣行。Case 2）
 #   - PLANGATE_HOOK_STRICT=1 は従来どおり no-task を一律 block（後方互換）
 if [ -z "$task_id" ]; then
-  case "$target_file" in
+  # 正規化（V-3/Gemini 指摘）: 末尾空白除去 + 小文字化で plan.md 判定回避を防ぐ
+  #   - macOS は既定で大文字小文字非区別 → PLAN.md で OS 上は plan.md 改変可能
+  #   - "plan.md "（末尾空白）等の表記揺れも plan.md として扱う
+  _tf_lc=$(printf '%s' "$target_file" | sed 's/[[:space:]]*$//' | tr 'A-Z' 'a-z')
+  case "$_tf_lc" in
     */plan.md|plan.md)
       reason="plan.md edited without TASK context (EH-3 bypass guard): $target_file"
       log_event "VIOLATION" "$reason"
