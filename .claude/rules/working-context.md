@@ -182,9 +182,22 @@ status.md / current-state.md が「進行中の情報管理」であるのに対
 - TestCasesチェック（3項目）: 受入基準との紐付き、Edge case網羅、自動化可否
 - 判定: PASS / WARN / FAIL + 指摘事項
 
-### review-external.md（外部AIレビュー結果）
+### review-external.md（外部AIレビュー結果 / 指摘の追記専用集約）
 
 フェーズC-2で生成（任意）。外部AIツールによるレビュー結果。
+
+**C-2 指摘の差分管理（TASK-0076 F5-C / #234-C）**:
+- C-2 + 外部指摘は **review-external.md に追記専用で集約**する（計画本体へ
+  都度マージしない＝版管理困難・監査性低下・反映コスト化を防ぐ）
+- 各指摘に **指摘ID `R-NNN`** を採番。指摘ゼロでも「指摘なし」を明示記録
+  （監査連続性）
+- 計画本体（plan/todo/test-cases）への反映は **exec 開始時に 1 回だけ
+  確定反映**。反映コミットメッセージに `Refs: R-NNN` を記載し
+  「指摘ID → 反映コミット」を追跡可能にする
+- C-3=CONDITIONAL の指摘反映もこの 1 回確定に含め、plan_hash 再計算と
+  整合させる（EH-3 と矛盾しない運用）
+- 将来 #230（Gate Event Normalization）/ #200 と additive に events 連携
+  （`review-finding → plan-revision` トレース）。本 PBI は ID+Refs まで
 
 ### status.md（作業ステータス）
 
@@ -255,10 +268,10 @@ status.mdの更新タイミングと記載内容を段階で分ける:
 - `review-self.md`（C-1）と`review-external.md`（C-2）のレビュー結果を人間が確認
 - 三値で判断:
   - **APPROVE**: exec開始。status.mdに`## C-3 Gate: APPROVED`を記録
-  - **CONDITIONAL**: 指摘をplan.mdに反映 + 簡易C-1再実行 → exec開始。status.mdに`## C-3 Gate: CONDITIONAL`を記録
+  - **CONDITIONAL**: 指摘は review-external.md（追記専用・`R-NNN`）に集約済とし、**exec 開始時に 1 回だけ** plan/todo/test-cases へ確定反映（`Refs: R-NNN`）+ 簡易C-1再実行 → exec開始。status.mdに`## C-3 Gate: CONDITIONAL`を記録
   - **REJECT**: plan再生成。status.mdに`## C-3 Gate: REJECTED`を記録
 - C-2（`review-external.md`）は任意。C-2をスキップする場合はC-1のみで判断可
-- FAILが出た場合は指摘事項を反映してplan.md / todo.md / test-cases.mdを再生成する
+- FAILが出た場合は指摘事項（review-external.md の `R-NNN`）を反映してplan.md / todo.md / test-cases.mdを再生成する（反映コミットに `Refs: R-NNN`）
 
 #### C-4ゲート（PRレビュー・三値）
 
