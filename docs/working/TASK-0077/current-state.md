@@ -1,13 +1,13 @@
 # TASK-0077 現在状態
 
-> 更新日: 2026-05-17
-> フェーズ: A — PBI INPUT 作成中
+> 更新: 2026-05-17 / フェーズ: 計画完了クローズ（C-3 APPROVED）
 
-## 中断地点
+## 完了
 
-pbi-input.md を記入してください。
+F5-AD（Lite分岐+C-3降格）の設計を策定。C-1/C-2/C-3 APPROVE。
+承認境界は撤廃せず opt-in 可変化の設計を承認。AC-8〜13 に C-2 指摘確定反映。
 
-## 次のアクション
+## 次（別 PBI）
 
-1. `docs/working/TASK-0077/pbi-input.md` の Why / What / AC を埋める
-2. `/ai-dev-workflow TASK-0077 plan` で plan / todo / test-cases を生成する
+実装 PBI を起票（rules/mode-classification/C-3 ゲート実変更）。
+AC-8〜13 を要件継承。本 PBI では実変更しない（AC-13 歯止め）。
