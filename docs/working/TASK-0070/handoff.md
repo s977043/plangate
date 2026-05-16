@@ -45,6 +45,11 @@ V-3 外部レビュー（Gemini）: 初回 REJECT（critical2/major2）→ 全 c
 
 ## 3. V2 候補
 
+- **方針レビュー派生 V2（Codex×Gemini 合意, direction-codex-gemini.md）**:
+  (1) AC-8 Manual Gate 化 + Shadow Config ロック (2) settings drift check CI required
+  (3) EH-3 バイパス不要化（メンテモード/除外タグ）+ SKIP_REASON 例外申請プロトコル
+  (4) 責務 4 分類（AI/Human/CI/Workflow-owned）の正式文書化
+
 - 他 Hook（EH-1/2/4-8）への同種ファイルパス感応ロジック横展開の要否評価
 - stdin JSON パーサの共通関数化（現状 sed inline、各 hook 重複）
 
