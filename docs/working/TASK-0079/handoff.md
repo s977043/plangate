@@ -21,6 +21,13 @@ status: done
 | AC-8 既定OFF挙動不変 | PASS | 完全 additive（削除行 0）・既存5mode/C-3三値非破壊・hook 78/0・scripts不変 |
 | AC-9 監査記録 | PASS | decision-log.jsonl(append-only)+status.md に降格/override/reject 記録 |
 
+## 1-bis. V-3/V-4 結果（Codex 承認可 / V-4 全 PASS）
+
+V-3 Codex=承認可（critical0/major0/minor1）。Gemini 出力不全→Codex 主体。
+minor（critical Lite 例外と非同期降格の関係）を mode-classification に一文
+反映。V-4 リリース前チェック（critical 必須）全 PASS（hook 78/0・additive
+削除行0・既存非破壊・scripts不変・承認境界非撤廃・handoff6要素）。
+
 ## 2. 既知課題一覧
 
 - AC-10 Hardening Override は TASK-0071（#244 OPEN）未マージのため**概念

@@ -69,7 +69,10 @@
   新規設計の有無が曖昧 のいずれかなら **必ず `lite_eligible=false`（Standard・
   同期 C-3）**。Lite は「証明可能なときだけの例外」であり既定ではない。
 - **AC-11**: `critical` mode は**原則 `lite_eligible=false`**。例外を許す
-  場合は人間が C-3 で明示承認した記録を要する。
+  場合は人間が C-3 で明示承認した記録を要する。**事前の C-3 明示承認が
+  無い `critical` は `lite_eligible=false`**＝Lite ゲートにも C-3 非同期
+  降格（working-context #### C-3 条件付き降格）の対象にもならない
+  （V-3 minor 反映・運用誤読防止）。
 - **AC-12**: Lite ゲートの外部レビューは **1 本**だが、その 1 本は
   `critical/major=0` を要求し観点固定（品質を下げない）。
 
