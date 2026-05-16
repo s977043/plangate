@@ -38,6 +38,22 @@ status: done
   hook-wiring も PASS（dry-run で適用内容確認済）＝「適用済み環境で PASS」
   という AC-6 を満たす。
 
+## 1-ter. V-3 fix-loop（Codex critical2/major3 / Gemini APPROVED）
+
+Codex=REJECT級(critical2/major3/minor3)、Gemini=APPROVED。critical をブロッカー
+採用し fix-loop:
+- CR-1: apply-claude-settings.sh が EH-9 を実適用せず案内のみ→「適用済み誤認」
+  再導入だった → **python JSON 構造マージで EH-3 PLANGATE_HOOK_FILE+EH-9 を
+  実適用・backup&restore・適用後契約検証で未適用残は非0**（一時コピーで
+  before FAIL→apply→after PASS・冪等・JSON valid 検証済）
+- CR-2: check-settings-wiring.sh が grep のみ→誤検出 → **python で
+  .hooks.PreToolUse[] の matcher/command を構造検証**（_comment_/別matcher/
+  無効JSON 排除。example PASS / user FAIL を exit code で確認）
+- MJ-1/2/3: 責務分離（CI=reference健全性 / doctor=実体 / 既存doctorも是正後
+  FAIL）+ タスクロック強制経路（DoD+通常doctor FAIL+Iron Law）+ 完全機械化は
+  V2 を contract doc に明文化
+- minor: apply は冒頭で JSON 妥当性 load・sed 廃止(python)・失敗時 restore
+
 ## 2. 既知課題一覧
 
 - `.claude/settings.json` への wiring 実適用は **ユーザー実行**

@@ -1,51 +1,91 @@
 #!/bin/sh
-# apply-claude-settings.sh — settings wiring 契約適用（TASK-0080 S1a）
+# apply-claude-settings.sh — settings wiring 契約 適用（TASK-0080 S1a / V-3 CR-1）
 #
-# `.claude/settings.json` を settings wiring 契約
-# （docs/ai/settings-wiring-contract.md / .claude/settings.example.json）に
-# 整合させる。**ユーザーが実行**する（AI は self-mod ガードで
-# .claude/settings.json を編集できないため）。冪等（複数回実行安全）。
+# `.claude/settings.json` を wiring 契約に整合させる。**ユーザーが実行**
+# （AI は self-mod ガードで .claude/settings.json を編集不可）。
+# JSON 構造マージで EH-3 の PLANGATE_HOOK_FILE 引数 / EH-9 ブロックを実適用。
+# 冪等・backup&restore・適用後に契約検証し未適用残があれば非0（誤認防止）。
 #
-# 使い方:  sh scripts/apply-claude-settings.sh [--dry-run]
-#
-# 動作: .claude/settings.json が無ければ settings.example.json をコピー。
-#       あれば EH-3 の PLANGATE_HOOK_FILE と EH-9 wiring の不足のみ補う。
+#   sh scripts/apply-claude-settings.sh [--dry-run]
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 SJ="$ROOT/.claude/settings.json"
 EX="$ROOT/.claude/settings.example.json"
 DRY=0; [ "${1:-}" = "--dry-run" ] && DRY=1
-
 [ -f "$EX" ] || { printf 'error: %s not found\n' "$EX" >&2; exit 2; }
 
 if [ ! -f "$SJ" ]; then
   printf '[apply] .claude/settings.json 不在 → settings.example.json をコピー\n'
   [ "$DRY" -eq 1 ] || cp "$EX" "$SJ"
-  printf '[apply] done (copied)\n'; exit 0
+  [ "$DRY" -eq 1 ] && { printf '[apply] --dry-run: コピーせず\n'; exit 0; }
+else
+  [ "$DRY" -eq 1 ] && printf '[apply] --dry-run: 構造マージ内容のみ確認\n'
+  BAK="$SJ.bak.$(date +%s)"
+  [ "$DRY" -eq 1 ] || cp "$SJ" "$BAK"
+  if ! python3 - "$SJ" "$EX" "$DRY" <<'PY'
+import json, sys
+SJ, EX, DRY = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
+try:
+    doc = json.load(open(SJ))
+except Exception as e:
+    print(f"[apply] FAIL: {SJ} 無効 JSON: {e}", file=sys.stderr); sys.exit(2)
+ex = json.load(open(EX))
+pre = doc.setdefault("hooks", {}).setdefault("PreToolUse", [])
+changed = []
+
+# 1) EH-3: check-plan-hash.sh の command に ${PLANGATE_HOOK_FILE:-} を付与
+for blk in pre:
+    for h in blk.get("hooks", []) or []:
+        c = h.get("command", "")
+        if "check-plan-hash.sh" in c and "${PLANGATE_HOOK_FILE:-}" not in c:
+            h["command"] = c.replace(
+                "${PLANGATE_HOOK_TASK:-}",
+                "${PLANGATE_HOOK_TASK:-} ${PLANGATE_HOOK_FILE:-}", 1)
+            changed.append("EH-3 PLANGATE_HOOK_FILE")
+
+# 2) EH-9: 無ければ settings.example.json の EH-9 ブロックを取り込む
+def has_eh9(blocks):
+    return any("check-delegation-commit-boundary.sh" in h.get("command", "")
+               for b in blocks for h in (b.get("hooks") or []))
+if not has_eh9(pre):
+    ex_pre = ex.get("hooks", {}).get("PreToolUse", [])
+    eh9 = next((b for b in ex_pre
+                if any("check-delegation-commit-boundary.sh" in h.get("command", "")
+                       for h in (b.get("hooks") or []))), None)
+    if eh9 is not None:
+        pre.append(eh9)
+        changed.append("EH-9 block")
+    else:
+        print("[apply] WARN: settings.example.json に EH-9 ブロックが無い", file=sys.stderr)
+
+if DRY:
+    print(f"[apply] --dry-run 適用予定: {changed or ['(変更なし)']}")
+    sys.exit(0)
+if changed:
+    json.dumps(doc)  # 妥当性
+    with open(SJ, "w") as f:
+        json.dump(doc, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+    print(f"[apply] 適用: {changed}")
+else:
+    print("[apply] 既に契約準拠（変更なし）")
+sys.exit(0)
+PY
+  then
+    rc=$?
+    if [ "$DRY" -eq 0 ] && [ -f "$BAK" ]; then
+      cp "$BAK" "$SJ"; printf '[apply] エラー→ %s から復元\n' "$BAK" >&2
+    fi
+    exit "$rc"
+  fi
+  [ "$DRY" -eq 0 ] && [ -f "$BAK" ] && rm -f "$BAK"
 fi
 
-need_file=0; need_eh9=0
-grep -q 'check-plan-hash.sh ${PLANGATE_HOOK_TASK:-} ${PLANGATE_HOOK_FILE:-}' "$SJ" || need_file=1
-grep -q 'check-delegation-commit-boundary.sh' "$SJ" || need_eh9=1
-
-if [ "$need_file" -eq 0 ] && [ "$need_eh9" -eq 0 ]; then
-  printf '[apply] 既に契約準拠（変更なし）\n'; exit 0
+[ "$DRY" -eq 1 ] && exit 0
+# 適用後に契約検証（未適用残があれば非0＝「適用済み誤認」防止 / V-3 CR-1）
+if sh "$ROOT/scripts/check-settings-wiring.sh" --target user >/dev/null 2>&1; then
+  printf '[apply] done: settings wiring 契約準拠を確認\n'; exit 0
 fi
-
-printf '[apply] 不足: EH-3 PLANGATE_HOOK_FILE=%s / EH-9=%s\n' "$need_file" "$need_eh9"
-if [ "$DRY" -eq 1 ]; then printf '[apply] --dry-run: 変更なし\n'; exit 0; fi
-
-# EH-3 に PLANGATE_HOOK_FILE 追加（idempotent: 既適用ならスキップ済）
-if [ "$need_file" -eq 1 ]; then
-  tmp=$(mktemp)
-  sed 's#check-plan-hash.sh ${PLANGATE_HOOK_TASK:-}\(\\?\)"#check-plan-hash.sh ${PLANGATE_HOOK_TASK:-} ${PLANGATE_HOOK_FILE:-}\1"#' "$SJ" >"$tmp" && mv "$tmp" "$SJ"
-fi
-# EH-9 不足時は settings.example.json の EH-9 ブロックを案内（構造マージは
-# ユーザー判断が安全。自動 JSON マージは破壊リスクのため手動を促す）
-if [ "$need_eh9" -eq 1 ]; then
-  printf '[apply] EH-9 wiring 不足。settings.example.json の EH-9 ブロックを\n'
-  printf '        .claude/settings.json の PreToolUse 配列へ手動追加してください\n'
-  printf '        （構造マージは破壊回避のため手動。doctor --check-settings で再検証）\n'
-fi
-python3 -c "import json,sys; json.load(open('$SJ'))" && printf '[apply] JSON valid\n'
-printf '[apply] done\n'
+printf '[apply] FAIL: 適用後も契約未準拠が残存（手動確認が必要）\n' >&2
+sh "$ROOT/scripts/check-settings-wiring.sh" --target user 2>&1 | sed 's/^/  /' >&2
+exit 1

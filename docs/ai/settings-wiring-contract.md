@@ -34,3 +34,33 @@
 - `.claude/settings.json` の AI 直接編集は禁止（self-mod ガード・恒久制約）。
   AI は契約定義・検証・適用 script 提供まで。適用は人間。
 - 本契約の追加 hook は settings.example.json と整合させること。
+
+
+## 責務分離（V-3 MJ-2/MJ-3 反映）
+
+| 層 | 検証対象 | 手段 | 役割 |
+|----|---------|------|------|
+| CI `settings-drift`（required）| `.claude/settings.example.json`（契約 reference）| `check-settings-wiring.sh --target example` | 正本 reference が契約と乖離しないことを保証（example が壊れたら全員に波及するため）|
+| `bin/plangate doctor --check-settings` | `.claude/settings.json`（ユーザー実体）| 構造（JSON）検証 | 実環境の wiring 未適用＝Shadow Config を検出 |
+| 既存 `bin/plangate doctor` hook-wiring check | `.claude/settings.json` vs `.claude/settings.example.json` | 既存 check（TASK-0069）| settings.example.json を契約整合させた結果、未適用を**通常 doctor でも FAIL**（従来の false-PASS を是正）|
+
+`.claude/settings.json` は gitignore（ユーザーローカル）のため **CI では検出
+不可**。実体 drift の検出は doctor（ローカル / V-1・handoff DoD）が担う。
+両者は役割が異なり、どちらか一方では「Shadow Config を構造的に防ぐ」根拠に
+ならない（CI=reference 健全性 / doctor=実体適用）。
+
+## タスクロックの強制経路（V-3 MJ-1 反映）
+
+V-1/handoff 完了の DoD（[`docs/workflows/05_verify_and_handoff.md`](../workflows/05_verify_and_handoff.md)
+/ [`working-context.md`](../../.claude/rules/working-context.md)）に
+「`doctor --check-settings` PASS」を必須化。強制は次の二重で成立する:
+
+1. **DoD 明文 + 通常 `doctor` の hook-wiring FAIL**: settings.example.json を
+   契約整合させたため、未適用環境では `bin/plangate doctor`（通常実行）も
+   FAIL する。doctor FAIL 状態での完了報告は Iron Law（検証証拠なしに完了
+   扱いしない）違反。
+2. **`doctor --check-settings`**: 構造検証で未適用箇所を決定論的に列挙。
+
+> 既知の限界（V2 候補）: 完全な PreToolUse-hook レベルの機械 block（V-1
+> 実行経路への物理結線）は本スライス範囲外。現状は DoD + doctor FAIL +
+> Iron Law による強制。完全機械化は TASK-0071 S3/S4 または別 PBI で扱う。
