@@ -46,15 +46,47 @@ if [ "${PLANGATE_BYPASS_HOOK:-0}" = "1" ]; then
   exit 0
 fi
 
-# TASK resolution
-task_id=${PLANGATE_HOOK_TASK:-}
-if [ -z "$task_id" ]; then
-  task_id=${1:-}
+# TASK / 対象ファイル resolution
+# codebase 慣行（check-forbidden-files.sh）に合わせ env → 位置引数の順。
+task_id=${PLANGATE_HOOK_TASK:-${1:-}}
+target_file=${PLANGATE_HOOK_FILE:-${2:-}}
+
+# PreToolUse hook では Claude Code が stdin に JSON（tool_input.file_path）を
+# 渡す。env / 引数で未指定なら stdin JSON から対象パスを補完する（最終手段）。
+if [ -z "$target_file" ] && [ ! -t 0 ]; then
+  _stdin=$(cat 2>/dev/null || true)
+  if [ -n "$_stdin" ]; then
+    target_file=$(printf '%s' "$_stdin" \
+      | sed -n 's/.*"file_path"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+      | head -1)
+  fi
 fi
 
+# P4(d) ファイルパス感応型ガード（TASK-0070 / C-3 F1-b 採用 / Gemini レビュー）:
+#   - TASK 文脈なし & 対象が plan.md → BLOCK（C-3 承認後の plan 改変を
+#     TASK 文脈を消して通す攻撃を阻止。Gemini 相談 Case 1）
+#   - TASK 文脈なし & plan.md 以外 → SKIP（汎用 Edit/Write を許可。
+#     check-forbidden-files.sh と同じ「no task→skip」慣行。Case 2）
+#   - PLANGATE_HOOK_STRICT=1 は従来どおり no-task を一律 block（後方互換）
 if [ -z "$task_id" ]; then
-  printf 'Usage: %s <TASK-XXXX>  (or set PLANGATE_HOOK_TASK)\n' "$0" >&2
-  exit 2
+  case "$target_file" in
+    */plan.md|plan.md)
+      reason="plan.md edited without TASK context (EH-3 bypass guard): $target_file"
+      log_event "VIOLATION" "$reason"
+      printf '[Hook EH-3] BLOCK: plan.md edited without TASK context.\n' >&2
+      printf '  target: %s\n' "$target_file" >&2
+      printf '  Set PLANGATE_HOOK_TASK=TASK-XXXX to allow plan.md edits.\n' >&2
+      exit 2
+      ;;
+  esac
+  if [ "${PLANGATE_HOOK_STRICT:-0}" = "1" ]; then
+    printf 'Usage: %s <TASK-XXXX>  (or set PLANGATE_HOOK_TASK)\n' "$0" >&2
+    exit 2
+  fi
+  reason="no task_id; non-plan target (${target_file:-unknown}) — skipped"
+  log_event "SKIP" "$reason"
+  printf '[Hook EH-3 SKIP] %s\n' "$reason"
+  exit 0
 fi
 
 case "$task_id" in
