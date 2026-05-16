@@ -66,8 +66,8 @@ status: draft
 
 ## Questions / Unknowns
 
-- 委譲境界の構造化表現と検出主体（S2 / C-3 判断）
-- settings wiring の要否（Hook 方式採用時。TASK-0070 同様ユーザー手動か）→ C-3
+- ~~委譲境界の構造化表現と検出主体~~ → **C-3確定: 表現=todo.md 委譲タスクのメタフィールド / 検出=PreToolUse Hook on git（決定論100%強制）+ exec後検証ステップ の二段**
+- ~~settings wiring 要否~~ → **C-3確定: Hook 採用のため wiring 必要。Claude 適用不可（TASK-0070 教訓）→ AC を「Hook script(Claude) + wiring 手順(ユーザー手動)」に分解、handoff 明記**
 
 ## Mode判定
 
@@ -79,5 +79,4 @@ status: draft
 - 変更種別: 強制力レイヤ追加 + core-contract 追記 → 高〜超高
 - リスク: 高（誤検出が正常作業阻害。F1 整合必須）
 - 例外: セキュリティ/強制力関連 → 最低中、core-contract 追記含むため
-- **最終判定**: high-risk。S6 が core-contract の実質的不変条件追加に及ぶ場合は
-  critical へ格上げ（C-3 で確定）。V-3 必須
+- **最終判定（C-3確定）**: **high-risk**（core-contract は §5-bis 参照型の最小追記に留める）。V-3 必須・V-4 スキップ

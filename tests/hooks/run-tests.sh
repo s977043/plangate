@@ -248,6 +248,57 @@ else
   fail=$((fail + 1))
 fi
 
+# ---- check-delegation-commit-boundary.sh (EH-9 / TASK-0073 F2) ----
+note "check-delegation-commit-boundary.sh (EH-9)"
+
+# 境界宣言なし → allow（誤検出ゼロ）
+out=$(PLANGATE_HOOK_CMD="git commit -m x" sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
+if [ "$rc" -eq 0 ] && printf '%s' "$out" | grep -q '"continue":true'; then
+  printf '[PASS] EH-9: no boundary → allow\n'; pass=$((pass + 1))
+else
+  printf '[FAIL] EH-9: no boundary (rc=%d out=%s)\n' "$rc" "$out"; fail=$((fail + 1))
+fi
+
+# 境界宣言あり + commit + strict → block
+out=$(PLANGATE_DELEGATION_NOCOMMIT=1 PLANGATE_HOOK_STRICT=1 PLANGATE_HOOK_CMD="git commit -m x" sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
+if printf '%s' "$out" | grep -q '"continue":false'; then
+  printf '[PASS] EH-9: boundary+commit strict → block\n'; pass=$((pass + 1))
+else
+  printf '[FAIL] EH-9: boundary strict block (out=%s)\n' "$out"; fail=$((fail + 1))
+fi
+
+# 境界宣言あり + commit + default → warn(allow)
+out=$(PLANGATE_DELEGATION_NOCOMMIT=1 PLANGATE_HOOK_CMD="git push" sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
+if printf '%s' "$out" | grep -q '"continue":true' && printf '%s' "$out" | grep -q 'WARNING'; then
+  printf '[PASS] EH-9: boundary+push default → warn+allow\n'; pass=$((pass + 1))
+else
+  printf '[FAIL] EH-9: boundary default warn (out=%s)\n' "$out"; fail=$((fail + 1))
+fi
+
+# 境界あり + 無害コマンド → allow
+out=$(PLANGATE_DELEGATION_NOCOMMIT=1 PLANGATE_HOOK_CMD="ls -la" sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
+if printf '%s' "$out" | grep -q '"continue":true'; then
+  printf '[PASS] EH-9: boundary+innocuous → allow\n'; pass=$((pass + 1))
+else
+  printf '[FAIL] EH-9: boundary innocuous (out=%s)\n' "$out"; fail=$((fail + 1))
+fi
+
+# bypass > strict
+out=$(PLANGATE_BYPASS_HOOK=1 PLANGATE_DELEGATION_NOCOMMIT=1 PLANGATE_HOOK_STRICT=1 PLANGATE_HOOK_CMD="git commit" sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
+if printf '%s' "$out" | grep -q '"continue":true'; then
+  printf '[PASS] EH-9: bypass overrides strict\n'; pass=$((pass + 1))
+else
+  printf '[FAIL] EH-9: bypass (out=%s)\n' "$out"; fail=$((fail + 1))
+fi
+
+# stdin JSON fallback
+out=$(printf '{"tool_input":{"command":"git push origin x"}}' | PLANGATE_DELEGATION_NOCOMMIT=1 PLANGATE_HOOK_STRICT=1 sh "$HOOKS_DIR/check-delegation-commit-boundary.sh" 2>&1) && rc=0 || rc=$?
+if printf '%s' "$out" | grep -q '"continue":false'; then
+  printf '[PASS] EH-9: stdin JSON command → block\n'; pass=$((pass + 1))
+else
+  printf '[FAIL] EH-9: stdin JSON (out=%s)\n' "$out"; fail=$((fail + 1))
+fi
+
 # ---- Setup fixtures for EH-4 / EH-5 / EH-6 (Issue #169 Session B) ----
 TC_OK_NAME="TASK-HOOKTEST09"
 TC_NONE_NAME="TASK-HOOKTEST10"

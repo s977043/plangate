@@ -18,6 +18,7 @@
 - 最低限の自己レビュー結果が一覧化されている
 - 明示的な既知課題（妥協点・未着手項目）が一覧化されている
 - 実装単位ごとのコミット履歴が記録されている
+- 委譲タスクの commit/push 境界が宣言され、違反が無い（EH-9 + exec 後検証。[`../ai/contracts/execute.md`](../ai/contracts/execute.md) F2）
 
 ## 呼び出す Skill
 
