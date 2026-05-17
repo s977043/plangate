@@ -87,10 +87,28 @@ interface-preflight.md で合意した値域:
 | `normal` | 標準検証 | なし |
 | `strict` | 厳格検証 | PBI-116-06 `docs/ai/hook-enforcement.md` で定義（最低 3 件） |
 
-## 8-bis. v2 拡張フィールド（#197 / PBI-HI-003）
+## 8-bis. retry_strategy（Tool Error Taxonomy 接続 / #203）
+
+retryable な tool error（[tool-error-taxonomy.md](./tool-error-taxonomy.md) §4）
+の自動再試行方針。profile 別に値を持てる（未定義時は保守的既定）。
+
+| キー | 意味 | 既定（未定義時）|
+|------|------|----------------|
+| `max_retries` | retryable の自動再試行上限。超過で soft_warning 降格 | `1` |
+| `backoff` | `provider_timeout` 等の待機方針（none/linear/exponential）| `none` |
+
+- どの category が retry 対象かは [tool-error-taxonomy.md](./tool-error-taxonomy.md)
+  §2/§3 が正本。本節は **回数・待機の値域**のみを定義（責務分離）。
+- `release_blocker` 分類（schema_validation/missing_context/stale_contract）は
+  **retry しない**（max_retries に関わらず即停止）。
+- profile 拡張・値変更は §10 の方針（別 PBI / eval 根拠）に従う。
+
+## 8-ter. v2 拡張フィールド（#197 / PBI-HI-003）
 
 モデル差分をプロンプト全文 fork ではなく Model Profile に閉じ込めるための
 v2 追加（すべて任意フィールド・既存 v1 profile は無変更で valid）。
+`retry_strategy` の Tool Error Taxonomy 接続詳細は **§8-bis**（#269）を正とし、
+本節は v2 全 5 フィールドの値域・移行・privacy を扱う（重複定義しない）。
 
 | フィールド | 内容 | 値域 |
 |-----------|------|------|
@@ -103,7 +121,7 @@ v2 追加（すべて任意フィールド・既存 v1 profile は無変更で v
 ### retry_strategy と Tool Error Taxonomy の責務分離
 
 - **どの category が retry 対象か** は [tool-error-taxonomy.md](./tool-error-taxonomy.md)
-  （#203）が正本（**PR #269 提供。未マージ時は前方参照**）。
+  （#203・main 在席）が正本。回数・待機の値域は本書 **§8-bis**（#269）。
 - 本 `retry_strategy` は **回数（max_retries）・待機（backoff）・方針**のみを
   profile 別に定義（二重定義しない）。`release_blocker` 分類
   （schema_validation / missing_context / stale_contract）は max_retries に
@@ -134,8 +152,9 @@ minor・additive）として行い、free-form 化はしない。
   オプショナル追加 = minor）。
 - **Core Contract / Gate / Artifact schema はモデル別に変更しない**（v2 でも不変）。
 - v1→v2 の比較は [#196](https://github.com/s977043/plangate/issues/196)
-  eval comparison（`--harness-compare`、**PR #268 提供・前方参照**）で
-  v1 baseline と対比可能（profile を harness_metadata に記録）。
+  eval comparison（`--harness-compare`・main 在席）で v1 baseline と
+  対比可能（profile を harness_metadata に記録）。
+
 
 ## 9. critical mode 禁止の運用
 
