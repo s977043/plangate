@@ -914,7 +914,7 @@ cmd_metrics() {
     printf '  --validate           Validate every line of events.ndjson against plangate-event.schema.json\n' >&2
     printf '  --timeline           [experimental #229] Emit phase/gate/ts-ordered timeline JSON (schema 1.1)\n' >&2
     printf '  --aggregate          Aggregate across all TASKs (--report only)\n' >&2
-    printf '  --json               JSON output (--report only)\n' >&2
+    printf '  --json               JSON output (--report / --timeline)\n' >&2
     printf '  --markdown-section   Emit handoff §7 markdown table (--report only, v8.6.0 PR7 / K-1)\n' >&2
     printf '  --since <date>       Filter events with ts >= ISO date (v8.6.0 PR7 / K-2)\n' >&2
     return 1
@@ -961,6 +961,11 @@ cmd_metrics() {
 
   if [ "$mode" = "timeline" ]; then
     # #229 PBI-HI-013 (experimental): phase/gate/ts 順 timeline JSON
+    case "$passthrough" in
+      *--aggregate*|*--markdown-section*)
+        printf 'plangate metrics --timeline: --aggregate/--markdown-section は併用不可\n' >&2
+        return 2 ;;
+    esac
     tl="$plangate_root/scripts/metrics_timeline.py"
     if [ ! -f "$tl" ]; then
       printf 'error: scripts/metrics_timeline.py not found\n' >&2

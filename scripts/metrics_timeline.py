@@ -2,7 +2,7 @@
 """metrics_timeline.py — Trace Timeline v1 (#229 PBI-HI-013 / experimental)
 
 docs/working/_metrics/events.ndjson から TASK 単位の timeline を
-phase / gate / timestamp 順に正規化した JSON で出力する。
+phase / gate / timestamp 順（#229 AC-3 契約）に正規化した JSON で出力する。
 
   python3 scripts/metrics_timeline.py <TASK-XXXX> [--events-log PATH]
 
@@ -42,8 +42,11 @@ def main(argv: list[str]) -> int:
               file=sys.stderr)
         return 2
     if not log.exists():
-        print(json.dumps({"task_id": task_id, "timeline": [],
-                          "note": "events.ndjson not found"}, ensure_ascii=False))
+        print(json.dumps(
+            {"task_id": task_id, "schema_version": "1.1",
+             "experimental": True, "count": 0, "timeline": [],
+             "note": "events.ndjson not found"},
+            ensure_ascii=False, indent=2))
         return 0
     evs = []
     for raw in log.read_text().splitlines():
@@ -58,9 +61,10 @@ def main(argv: list[str]) -> int:
             evs.append(ev)
 
     def sort_key(ev):
+        # #229 AC-3 契約: phase / gate / timestamp 順で正規化
         ph = ev.get("phase", "")
         pidx = PHASE_ORDER.index(ph) if ph in PHASE_ORDER else len(PHASE_ORDER)
-        return (ev.get("ts", ""), pidx, ev.get("gate_id", ""))
+        return (pidx, ev.get("gate_id", "") or "", ev.get("ts", "") or "")
 
     evs.sort(key=sort_key)
     timeline = [

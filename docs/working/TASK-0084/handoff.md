@@ -17,6 +17,15 @@ status: done
 | AC-6 README/quickstart 非掲載 | PASS | 本変更で README/quickstart へ追加なし（既存のロードマップ行 L74 は Experimental 明記済・別件 / 既存 `timeline` サブコマンドは別機能）。使用手順は metrics.md(audit/debug)限定 |
 | AC-7 回帰なし | PASS | hook 78/0・CLI 64/0・schema-self valid・metrics_reporter 非破壊 |
 
+## 1-bis. V-3 fix-loop（Codex major2 / Gemini 出力なし）
+
+Codex=critical0/major2/minor3。critical なし（後方互換 OK 確認）。fix-loop:
+- MJ-1: gate_id/parent_event_id に pattern+maxLength（Privacy#202 を schema で
+  物理阻止＝slash/空白/自由文 reject）
+- MJ-2: sort を #229 AC-3 契約どおり phase→gate→ts に修正・docstring 整合
+- minor: 空shape統一 / help 修正 / --timeline 非対応flag併用 exit2
+再 V-1 PASS、hook 78/0・CLI 64/0・schema-self valid。
+
 ## 2. 既知課題一覧
 - gate_id 語彙は最小（命名規則正規化は #230 Gate Event Normalization v8.8.0）
 - metrics_collector は schema_version 1.0 のまま（1.1 は experimental・additive。

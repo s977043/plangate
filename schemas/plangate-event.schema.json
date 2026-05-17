@@ -153,11 +153,15 @@
     },
     "gate_id": {
       "type": "string",
-      "description": "Gate event identifier (1.1 optional / experimental #229; vocabulary normalized in #230 v8.8.0)"
+      "description": "Gate event identifier (1.1 optional / experimental #229). Privacy(#202): 識別子のみ・slash/空白/自由文不可。語彙正規化は #230 v8.8.0",
+      "pattern": "^[A-Za-z0-9._:-]{1,64}$",
+      "maxLength": 64
     },
     "parent_event_id": {
       "type": "string",
-      "description": "Causal link to a prior event (1.1 optional / experimental #229)"
+      "description": "Causal link to a prior event id (1.1 optional / experimental #229). Privacy(#202): 識別子のみ・slash/空白/自由文不可",
+      "pattern": "^[A-Za-z0-9._:-]{1,64}$",
+      "maxLength": 64
     }
   },
   "allOf": [
