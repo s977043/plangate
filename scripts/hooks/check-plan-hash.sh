@@ -99,7 +99,55 @@ if [ -z "$task_id" ]; then
     printf 'Usage: %s <TASK-XXXX>  (or set PLANGATE_HOOK_TASK)\n' "$0" >&2
     exit 2
   fi
-  reason="no task_id; non-plan target (${target_file:-unknown}) — skipped"
+
+  # ===== TASK-0082 / TASK-0071 S3: メンテモード（承認ファイル方式）=====
+  # 優先順 BYPASS(上記) > メンテ > 通常(SKIP_REASON)。plan.md は上で BLOCK 済
+  # ＝メンテで覆らない(E1)。env では有効化しない(承認ファイルのみ=AI自己付与不可)。
+  _maint="$REPO_ROOT/docs/working/_maintenance/maintenance.json"
+  if [ -f "$_maint" ]; then
+    _mvalid=$(python3 - "$_maint" <<'PYM' 2>/dev/null || true
+import json,sys,time
+try:
+    d=json.load(open(sys.argv[1]))
+    ga=int(d["until"]); gat=int(d["granted_at"])
+    ok = (str(d.get("approved_by","")).strip()!=""
+          and str(d.get("reason","")).strip()!=""
+          and ga>int(time.time())               # 未失効
+          and ga-gat<=1800 and ga-gat>0)        # 最大30分
+    print("valid" if ok else "invalid")
+except Exception:
+    print("invalid")
+PYM
+)
+    if [ "$_mvalid" = "valid" ]; then
+      reason="MAINTENANCE_SKIP: non-plan ${target_file:-unknown} (承認ファイル有効・最大30分窓)"
+      log_event "MAINTENANCE_SKIP" "$reason"
+      printf '[Hook EH-3 SKIP] %s\n' "$reason"
+      exit 0
+    fi
+    log_event "MAINTENANCE_INVALID" "maintenance.json 不正/失効 → fail-closed(通常 SKIP_REASON 判定へ)"
+  fi
+
+  # ===== SKIP_REASON 例外申請（空なら SKIP せず停止）=====
+  _skipr=${PLANGATE_SKIP_REASON:-}
+  if [ -z "$_skipr" ] && [ -n "$task_id" ]; then
+    _todo="$WORKING_DIR/$task_id/todo.md"
+    [ -f "$_todo" ] && _skipr=$(grep -i 'SKIP_REASON:' "$_todo" 2>/dev/null | head -1 | sed 's/.*SKIP_REASON:[[:space:]]*//')
+  fi
+  if [ -z "$_skipr" ]; then
+    log_event "SKIP_BLOCKED" "no task_id non-plan SKIP but SKIP_REASON empty — refusing to skip (set PLANGATE_SKIP_REASON)"
+    printf '[Hook EH-3] SKIP 拒否: SKIP_REASON 未設定。\n' >&2
+    printf '  PLANGATE_SKIP_REASON=... を設定するか、メンテ承認ファイルを人間が発行してください。\n' >&2
+    exit 2
+  fi
+  # decision-log.jsonl に reason を append（人間が後で acknowledged_by 追記→CI が未追記を fail）
+  _dlog="$WORKING_DIR/_audit/skip-decision-log.jsonl"
+  mkdir -p "$(dirname "$_dlog")"
+  _ts=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+  _esc_r=$(printf '%s' "$_skipr" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr -d '\n\r\t')
+  _esc_f=$(printf '%s' "${target_file:-unknown}" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr -d '\n\r\t')
+  printf '{"ts":"%s","event":"EH-3_SKIP","target":"%s","skip_reason":"%s","acknowledged_by":null,"acknowledged_at":null}\n' "$_ts" "$_esc_f" "$_esc_r" >>"$_dlog"
+  reason="no task_id; non-plan target (${target_file:-unknown}) — skipped (SKIP_REASON 記録済・要人間追認)"
   log_event "SKIP" "$reason"
   printf '[Hook EH-3 SKIP] %s\n' "$reason"
   exit 0
