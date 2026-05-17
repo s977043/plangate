@@ -85,6 +85,12 @@ sh bin/plangate eval TASK-0050 --baseline TASK-0046
 #   ac_coverage_delta_percent / format_adherence_delta_percent / release_blocker_status
 ```
 
+> **PlanGateBench 連携（#204）**: 代表 TASK 選定は
+> [`plangatebench.md`](./plangatebench.md) の fixture パターンに揃える
+> （baseline と target で同一パターン → 比較対象の揺れを排除）。
+> `--harness-compare`/`--targets` は #196（PR #268）提供。未マージ環境では
+> 個別 `plangate eval <TASK>` で選定を揃える。
+
 ### dry-run（出力せず確認）
 
 ```sh
