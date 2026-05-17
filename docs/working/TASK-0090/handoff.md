@@ -31,3 +31,9 @@ plangate-plugin-migration.md から逆参照を結線。V-3 で展開パス(stri
 採用基盤 4 件）すべて実装完了。マージ順は #263→#264 推奨。
 ## 6. テスト結果
 V-1: T1-T6 + E1/E2 全 PASS。V-3 反映後回帰全 PASS。
+
+## 7. C-4 ラウンド更新（PR #266 / 2026-05-17）
+- #263/#264/#265 マージ済（#225/#226/#227 CLOSED）。本 PR は main 追従済（0 behind）。
+- versioning-stability-policy.md が main 在席 → 前方参照リンク解決済（§4-bis 改題）。
+- gemini-code-assist medium 3 件全反映: ghost-file 冪等化 / 消費側相対リンク 4 箇所を絶対 URL 化 / #263 マージ済表現更新。
+- 回帰 V-1 全 PASS・shell 構文 OK。残: #224 / PR #266 の人間承認＋マージのみ（Human-owned）。
