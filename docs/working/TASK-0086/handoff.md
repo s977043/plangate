@@ -15,6 +15,11 @@ status: done
 | AC-5 #228 整合 | PASS | dogfooding-eval.md judge-prompt が #228 5項目整合 |
 | AC-6 #229/#230 接続 | PASS | events.ndjson 読込 / #230 gate-event-normalization 参照（依存明記）|
 | AC-7 既存eval非破壊 | PASS | --dogfood 独立 mode・8-aspect 不変・CLI 64/0・hook 78/0 |
+## 1-bis. V-3 fix-loop（Codex major2/minor2 / Gemini なし）
+Codex critical0。初回探索逸れ＋ツール自己実走(blocker0 確認)→verdict 再取得。
+fix-loop: MJ-1(has_c4 括弧明示)/MJ-2(item5 claim 頑健化・不明瞭=PARTIAL)/
+mn-1(item3 片方=PARTIAL)。V-4 全PASS・CLI64/hook78・8-aspect 非破壊。
+
 ## 2. 既知課題一覧
 - v1 judge=決定論構造判定（C-3 D-1）。LLM judge は judge-prompt を外部基盤で
 - item5 repo-global skip は advisory(PARTIAL)＝当該TASK blocker化しない

@@ -26,6 +26,6 @@ c3_status=APPROVED / C-4 言及=True
 events.ndjson に TASK-0083 の event=False (experimental＝無くても FAIL ではなく PARTIAL)
 
 ### 5. Stop rules / core-contract 違反なし — PARTIAL
-証跡なし完了主張=False（TASK固有=FAIL対象） / repo-global 未追認SKIP=20（advisory・当該TASKのblockerにしない）
+証跡なし完了主張=False（TASK固有=FAIL対象） / repo-global 未追認SKIP=24（advisory・当該TASKのblockerにしない）
 
 ## Release blockers: 0 — マージ可

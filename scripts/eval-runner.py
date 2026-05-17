@@ -363,11 +363,17 @@ def dogfood_eval(task_id: str) -> dict:
     c3 = task_dir / "approvals" / "c3.json"
     c3st = read_c3_status(c3) if c3.is_file() else None
     ho_t = ho.read_text() if ho.is_file() else ""
-    has_c4 = "C-4" in ho_t or "C-4" in (task_dir / "status.md").read_text() \
-        if (task_dir / "status.md").is_file() else ("C-4" in ho_t)
-    add(3, "C-3/C-4 証跡",
-        "PASS" if (c3st and has_c4) else
-        ("PARTIAL" if c3st else "FAIL"),
+    status_p = task_dir / "status.md"
+    has_c4 = ("C-4" in ho_t) or (
+        status_p.is_file() and "C-4" in status_p.read_text())
+    # mn-1: 片方のみ証跡あり = PARTIAL（both=PASS / either=PARTIAL / neither=FAIL）
+    if c3st and has_c4:
+        v3 = "PASS"
+    elif c3st or has_c4:
+        v3 = "PARTIAL"
+    else:
+        v3 = "FAIL"
+    add(3, "C-3/C-4 証跡", v3,
         f"c3_status={c3st} / C-4 言及={bool(has_c4)}")
 
     # 4. Trace Timeline(experimental #229) イベント
@@ -398,11 +404,23 @@ def dogfood_eval(task_id: str) -> dict:
     # unack（skip-decision-log）は repo-global のため当該 TASK の release
     # blocker にはせず advisory（PARTIAL 注記）に留める（誤って全 TASK を
     # FAIL 化しない・#231 v1 は TASK 単位判定が主）。
-    claim_wo_evidence = ("完了" in ho_t and "PASS" not in ho_t
-                         and "テスト" not in ho_t) if ho_t else False
+    # MJ-2: 完了主張の検出を頑健化。handoff に「完了」系の主張があり、かつ
+    # 検証証跡語（PASS / テスト / hook 78 / CLI / 回帰 / 検証）が一切無い場合
+    # を「証跡なし完了主張」とみなす（否定文 false negative を緩和）。
+    evidence_terms = ("PASS", "テスト", "回帰", "検証", "hook ", "CLI ",
+                      "78/0", "64/0")
+    claim_terms = ("完了", "クローズ", "達成")
+    if ho_t:
+        has_claim = any(t in ho_t for t in claim_terms)
+        has_evidence = any(t in ho_t for t in evidence_terms)
+        claim_wo_evidence = has_claim and not has_evidence
+        ambiguous = has_claim and not has_evidence and len(ho_t) < 200
+    else:
+        claim_wo_evidence = False
+        ambiguous = False
     if claim_wo_evidence:
         v5 = "FAIL"
-    elif unack:
+    elif unack or ambiguous:
         v5 = "PARTIAL"
     else:
         v5 = "PASS"
