@@ -30,6 +30,15 @@ S3 は設計（s3a 案C）どおり **「no-task non-plan の bare SKIP（SKIP_R
 は新契約（SKIP_REASON 設定で SKIP）へ更新済。plan.md BLOCK / BYPASS /
 TASK 文脈ありの hash 検査は不変。
 
+## 1-ter. V-3 fix-loop（Codex major4 / Gemini クラッシュ）
+
+Codex=critical0/major4/minor2。critical なし。fix-loop 全反映:
+- MJ-1: SKIP_REASON strip+空白のみ拒否 / MJ-2: 死に分岐除去・源=env 明記
+- MJ-3: maintenance granted_at<=now 必須（承認前メンテ禁止）
+- MJ-4: skip-ack acknowledged_by/at 両方必須
+- minor: schema runtime=V2 / required化=ruleset(Human-owned) 明記
+再 V-1+V-4 PASS、hook 78/0・CLI 64/0。
+
 ## 2. 既知課題一覧
 
 - maintenance.json は人間生成（Human-owned。responsibility-classes.md）。

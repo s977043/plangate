@@ -110,10 +110,12 @@ import json,sys,time
 try:
     d=json.load(open(sys.argv[1]))
     ga=int(d["until"]); gat=int(d["granted_at"])
+    _now=int(time.time())
     ok = (str(d.get("approved_by","")).strip()!=""
           and str(d.get("reason","")).strip()!=""
-          and ga>int(time.time())               # 未失効
-          and ga-gat<=1800 and ga-gat>0)        # 最大30分
+          and gat<=_now                          # 付与は過去（承認前メンテ禁止）
+          and ga>_now                            # 未失効
+          and ga-gat<=1800 and ga-gat>0)         # 最大30分
     print("valid" if ok else "invalid")
 except Exception:
     print("invalid")
@@ -128,12 +130,11 @@ PYM
     log_event "MAINTENANCE_INVALID" "maintenance.json 不正/失効 → fail-closed(通常 SKIP_REASON 判定へ)"
   fi
 
-  # ===== SKIP_REASON 例外申請（空なら SKIP せず停止）=====
-  _skipr=${PLANGATE_SKIP_REASON:-}
-  if [ -z "$_skipr" ] && [ -n "$task_id" ]; then
-    _todo="$WORKING_DIR/$task_id/todo.md"
-    [ -f "$_todo" ] && _skipr=$(grep -i 'SKIP_REASON:' "$_todo" 2>/dev/null | head -1 | sed 's/.*SKIP_REASON:[[:space:]]*//')
-  fi
+  # ===== SKIP_REASON 例外申請（空/空白のみなら SKIP せず停止）=====
+  # 本ブロックは no-task 経路（task_id 空）。SKIP_REASON 源は env のみ
+  # （todo.md は TASK 文脈前提＝ここでは解決不能。V-3 MJ-2: 死に分岐を除去）。
+  # V-3 MJ-1: 前後空白を除去し「空白のみ」を実質空として拒否。
+  _skipr=$(printf '%s' "${PLANGATE_SKIP_REASON:-}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
   if [ -z "$_skipr" ]; then
     log_event "SKIP_BLOCKED" "no task_id non-plan SKIP but SKIP_REASON empty — refusing to skip (set PLANGATE_SKIP_REASON)"
     printf '[Hook EH-3] SKIP 拒否: SKIP_REASON 未設定。\n' >&2
