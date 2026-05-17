@@ -10,7 +10,7 @@
 | クラス | 担当 | 責務 | 代表例 |
 |--------|------|------|--------|
 | **AI-owned** | AI（Claude/Codex 等） | 実装・テスト・検証・PR 準備・manual patch / script 生成・設計/レビュー | コード実装、plan/handoff、`apply-claude-settings.sh` の**作成**、doctor 検証実行 |
-| **Human-owned** | 人間 | self-mod 対象ファイルの**適用**、C-3 / C-4 ゲート判断、**merge**、権限操作 | `.claude/settings*.json` への wiring 実適用、PR 承認/マージ、ruleset 操作 |
+| **Human-owned** | 人間 | **self-mod guard 対象**（`.claude/settings*.json` 等）の**適用**、C-3 / C-4 ゲート判断、**merge**、権限操作 | `.claude/settings*.json` への wiring 実適用、PR 承認/マージ、ruleset 操作 |
 | **CI-owned** | CI（GitHub Actions） | drift 検出、必須 contract 検証、未適用 manual action の機械検出 | `settings-drift`（契約↔settings.example.json）、schema-validate、markdownlint |
 | **Workflow-owned** | ワークフロー定義/ゲート | handoff artifact、DoD、未完了 manual action の追跡・ロック | WF-05 DoD タスクロック（doctor --check-settings PASS 必須）、handoff 6要素 |
 
@@ -25,13 +25,18 @@
   （doctor）/ 適用待ちの追跡・完了ロック=Workflow-owned。
 - 「適用したと誤認できない」構造（Shadow Config 防止）は Workflow-owned の
   タスクロック + CI-owned の drift + AI-owned の doctor 検証 の合成で成立。
+- **例外（階層維持）**: orchestrator-mode AS-3（親 PBI 完了宣言）は
+  `HumanOrPolicyFinalApprovalPassed`＝Human-owned **または事前定義 policy**。
+  本正本は上位集約だが、個別正本（orchestrator-mode）が policy 許容を
+  定める箇所はそちらが優先（矛盾でなく委譲）。
 
 ## 既存ルール対応
 
 | 既存ルール | 対応する分類観点 |
 |-----------|----------------|
 | [`hybrid-architecture.md`](./hybrid-architecture.md) Rule 1-5 | Workflow/Skill/Agent/CLAUDE.md/handoff の配置責務（本分類と直交・補完）|
-| [`orchestrator-mode.md`](./orchestrator-mode.md) AI 自己完結禁止条項 AS-1〜5 | Human-owned ゲート（親 PBI 分解確定/exec開始/完了宣言/scope変更）|
+| [`orchestrator-mode.md`](./orchestrator-mode.md) AS-1/2/4/5 | Human-owned ゲート（親 PBI 分解確定 / 子 exec 開始 / scope 変更 / forbidden_files 解除）|
+| [`orchestrator-mode.md`](./orchestrator-mode.md) AS-3（親完了宣言 / `ParentDone`）| **Human-owned または事前定義 policy**（`HumanOrPolicyFinalApprovalPassed`。orchestrator-mode 正本に従い Human 固定にしない）|
 | [`working-context.md`](./working-context.md) settings タスクロック | Workflow-owned（doctor 未PASS で V-1/handoff 完了不可）|
 | [`mode-classification.md`](./mode-classification.md) lite_eligible / C-3 降格 | Human-owned（承認境界）+ Workflow-owned（同期/非同期 opt-in）|
 | [`docs/ai/settings-wiring-contract.md`](../../docs/ai/settings-wiring-contract.md) 責務分離表 | CI-owned（reference）/ AI-owned（doctor 実体検証）/ Human-owned（適用）の具体適用例 |

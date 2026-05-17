@@ -18,6 +18,13 @@ status: done
 | AC-5 整合 | PASS | merge=Human-owned 固定 / 検証三者分担 が settings-wiring-contract・TASK-0077 AC-4 と矛盾なし |
 | AC-6 既存本文不変 | PASS | hybrid 削除行0（参照4行追加のみ）・他 rules 変更なし・hook 78/0 |
 
+## 1-bis. V-3 対応（Codex major1 fix-loop / Gemini クラッシュ）
+
+Codex=critical0/major1/minor2。critical なし。fix-loop: MJ-1=orchestrator-mode
+AS-3(ParentDone)は人間 or policy 許容 → AS-1/2/4/5 と AS-3 分割+階層例外明記。
+minor=Human-owned self-mod を self-mod guard 対象に限定。再 V-1 PASS、
+hook 78/0、hybrid additive。
+
 ## 2. 既知課題一覧
 
 - なし（additive な rules 正本新設・強制機構変更なし）
