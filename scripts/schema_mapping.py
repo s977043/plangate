@@ -39,6 +39,7 @@ FILENAME_TO_SCHEMA: dict[str, str] = {
     # （append-only NDJSON は plangate metrics --validate で検査する設計）
     "2026-05-04-baseline.json": "eval-baseline.schema.json",
     "plan-quality-check.json": "plan-quality-check.schema.json",
+    "eval-comparison.json": "eval-comparison.schema.json",
 }
 
 
