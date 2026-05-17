@@ -23,6 +23,39 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 WORKING = REPO / "docs" / "working"
 
+UNKNOWN = "unknown"
+C3_STATUSES = ("APPROVED", "CONDITIONAL", "REJECTED")
+C4_STATUSES = ("APPROVED", "REQUEST_CHANGES", "REJECTED")
+# metrics_collector.HOOK_LEVEL_TO_RESULT と整合（VIOLATION/BLOCK=block）
+_HOOK_VIOLATION_LEVELS = {"VIOLATION", "BLOCK"}
+
+
+def _read_json(path: Path) -> dict | None:
+    """存在チェックせず直接読む（TOCTOU 回避）。欠落/不正/不可は None。"""
+    try:
+        return json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+
+
+def _parse_status_md(text: str) -> dict:
+    """status.md から fix_loop / v1_first_pass を抽出（ヒューリスティック）。
+
+    fix loop: 1-2 桁・直後がハイフンの値は日付の誤検出として除外・上限 50。
+    """
+    out: dict = {}
+    nums = re.findall(
+        r"fix[ _-]?loop[^0-9\n]{0,16}?([0-9]{1,2})(?![0-9-])", text, re.I
+    )
+    vals = [int(x) for x in nums if 0 <= int(x) <= 50]
+    if vals:
+        out["fix_loop"] = max(vals)
+    if text:
+        out["v1_first_pass"] = bool(
+            re.search(r"V-1[^\n]*(PASS|first[ _-]?pass)", text, re.I)
+        )
+    return out
+
 
 def _date(s: str) -> _dt.date:
     return _dt.datetime.strptime(s, "%Y-%m-%d").date()
@@ -60,64 +93,30 @@ def collect(lo: _dt.date, hi: _dt.date) -> dict:
     for d in sorted(WORKING.glob("TASK-*")):
         if not d.is_dir():
             continue
-        c3p = d / "approvals" / "c3.json"
-        if not c3p.is_file():
-            continue
-        try:
-            c3 = json.loads(c3p.read_text())
-        except (OSError, ValueError):
-            continue
-        if not _in_range(c3.get("approved_at"), lo, hi):
+        c3 = _read_json(d / "approvals" / "c3.json")
+        if c3 is None or not _in_range(c3.get("approved_at"), lo, hi):
             continue
         rec = {"task_id": d.name, "c3_status": c3.get("c3_status")}
-        c4p = d / "approvals" / "c4-approval.json"
-        if c4p.is_file():
-            try:
-                rec["c4_status"] = json.loads(c4p.read_text()).get("c4_status")
-            except (OSError, ValueError):
-                pass
-        ev = d / "eval-result.json"
-        if ev.is_file():
-            try:
-                e = json.loads(ev.read_text())
-                rec["release_blockers"] = len(
-                    e.get("release_blocker_violations", [])
-                )
-                rec["ac_coverage"] = e.get("ac_coverage", {}).get(
-                    "rate_percent"
-                )
-                rec["latency_cost"] = e.get("latency_cost", {}).get("decision")
-            except (OSError, ValueError):
-                pass
-        kr = d / "keep-rate-result.json"
-        if kr.is_file():
-            try:
-                k = json.loads(kr.read_text())
-                rec["keep_rate"] = {
-                    "code": k.get("code_keep_rate", {}).get("value"),
-                    "plan": k.get("plan_keep_rate", {}).get("value"),
-                }
-            except (OSError, ValueError):
-                pass
-        # fix loop / V-1: status.md ヒューリスティック
-        st = d / "status.md"
-        if st.is_file():
-            try:
-                t = st.read_text()
-            except OSError:
-                t = ""
-            # fix loop 回数: 1-2 桁・直後がハイフン(日付)でない・上限 50
-            mm = re.findall(
-                r"fix[ _-]?loop[^0-9\n]{0,16}?([0-9]{1,2})(?![0-9-])",
-                t, re.I,
+        c4 = _read_json(d / "approvals" / "c4-approval.json")
+        if c4:
+            rec["c4_status"] = c4.get("c4_status")
+        e = _read_json(d / "eval-result.json")
+        if e:
+            rec["release_blockers"] = len(
+                e.get("release_blocker_violations", [])
             )
-            vals = [int(x) for x in mm if 0 <= int(x) <= 50]
-            if vals:
-                rec["fix_loop"] = max(vals)
-            if t:
-                rec["v1_first_pass"] = bool(
-                    re.search(r"V-1[^\n]*(PASS|first[ _-]?pass)", t, re.I)
-                )
+            rec["ac_coverage"] = e.get("ac_coverage", {}).get("rate_percent")
+            rec["latency_cost"] = e.get("latency_cost", {}).get("decision")
+        k = _read_json(d / "keep-rate-result.json")
+        if k:
+            rec["keep_rate"] = {
+                "code": k.get("code_keep_rate", {}).get("value"),
+                "plan": k.get("plan_keep_rate", {}).get("value"),
+            }
+        try:
+            rec.update(_parse_status_md((d / "status.md").read_text()))
+        except OSError:
+            pass
         tasks.append(rec)
     hook_viol = _hook_violations(lo, hi)
     return _aggregate(tasks, lo, hi, hook_viol)
@@ -130,23 +129,21 @@ def _hook_violations(lo: _dt.date, hi: _dt.date) -> dict:
     期間内の VIOLATION 行を hook 別に数える。ログ無/読めない時は unknown。
     """
     log = REPO / "docs" / "working" / "_audit" / "hook-events.log"
-    if not log.is_file():
-        return {"total": "unknown", "by_hook": {}}
-    try:
-        lines = log.read_text().splitlines()
-    except OSError:
-        return {"total": "unknown", "by_hook": {}}
     total = 0
     by_hook: dict = {}
-    for ln in lines:
-        cols = ln.split("\t")
-        if len(cols) < 3 or cols[1] != "VIOLATION":
-            continue
-        if not _in_range(cols[0], lo, hi):
-            continue
-        total += 1
-        hk = cols[2] or "unknown"
-        by_hook[hk] = by_hook.get(hk, 0) + 1
+    try:
+        with log.open(encoding="utf-8") as fh:
+            for ln in fh:
+                cols = ln.rstrip("\n").split("\t", 4)
+                if len(cols) < 3 or cols[1] not in _HOOK_VIOLATION_LEVELS:
+                    continue
+                if not _in_range(cols[0], lo, hi):
+                    continue
+                total += 1
+                hk = cols[2] or UNKNOWN
+                by_hook[hk] = by_hook.get(hk, 0) + 1
+    except OSError:
+        return {"total": UNKNOWN, "by_hook": {}}
     return {"total": total, "by_hook": by_hook}
 
 
@@ -161,29 +158,22 @@ def _aggregate(tasks: list[dict], lo: _dt.date, hi: _dt.date,
     # 未観測（status.md 無 / 文字列無＝key 未設定）は unknown 扱い。
     known = [t for t in tasks if isinstance(t.get("v1_first_pass"), bool)]
     v1p = sum(1 for t in known if t["v1_first_pass"])
-    v1_rate = (round(100.0 * v1p / len(known), 1) if known else "unknown")
+    v1_rate = (round(100.0 * v1p / len(known), 1) if known else UNKNOWN)
     fl = [t["fix_loop"] for t in tasks if isinstance(t.get("fix_loop"), int)]
     rb = sum(t.get("release_blockers", 0) or 0 for t in tasks)
     return {
         "schema": "report/v1",
         "period": {"from": lo.isoformat(), "to": hi.isoformat()},
         "task_count": n,
-        "c3": {
-            "approved": _count("c3_status", "APPROVED"),
-            "conditional": _count("c3_status", "CONDITIONAL"),
-            "rejected": _count("c3_status", "REJECTED"),
-        },
-        "c4": {
-            "approved": _count("c4_status", "APPROVED"),
-            "request_changes": _count("c4_status", "REQUEST_CHANGES"),
-            "rejected": _count("c4_status", "REJECTED"),
-        },
+        "c3": {k.lower(): _count("c3_status", k) for k in C3_STATUSES},
+        "c4": {("request_changes" if k == "REQUEST_CHANGES" else k.lower()):
+               _count("c4_status", k) for k in C4_STATUSES},
         "v1_first_pass_rate": v1_rate,
         "v1_first_pass_observed": len(known),
         "v1_first_pass_unknown": n - len(known),
-        "fix_loop_max": (max(fl) if fl else "unknown"),
+        "fix_loop_max": (max(fl) if fl else UNKNOWN),
         "release_blocker_total": rb,
-        "hook_violation": hook_viol or {"total": "unknown", "by_hook": {}},
+        "hook_violation": hook_viol or {"total": UNKNOWN, "by_hook": {}},
         "tasks": tasks,
     }
 
@@ -191,6 +181,9 @@ def _aggregate(tasks: list[dict], lo: _dt.date, hi: _dt.date,
 def render_md(r: dict) -> str:
     p = r["period"]
     c3, c4 = r["c3"], r["c4"]
+    _pct = "%" if isinstance(r["v1_first_pass_rate"], (int, float)) else ""
+    _bh = r["hook_violation"].get("by_hook")
+    _hv = f" ({_bh})" if _bh else ""
     lines = [
         f"# PlanGate Report: {p['from']} 〜 {p['to']}",
         "",
@@ -202,15 +195,12 @@ def render_md(r: dict) -> str:
         f"{c3['conditional']} / REJECTED {c3['rejected']}",
         f"- C-4: APPROVED {c4['approved']} / REQUEST_CHANGES "
         f"{c4['request_changes']} / REJECTED {c4['rejected']}",
-        f"- V-1 first pass rate: **{r['v1_first_pass_rate']}"
-        f"{'%' if isinstance(r['v1_first_pass_rate'], (int, float)) else ''}**",
+        f"- V-1 first pass rate: **{r['v1_first_pass_rate']}{_pct}**",
         f"- V-1 観測: {r['v1_first_pass_observed']} / 未観測(unknown): "
         f"{r['v1_first_pass_unknown']}",
         f"- fix loop max: {r['fix_loop_max']}",
         f"- release blocker total: {r['release_blocker_total']}",
-        f"- hook violation: {r['hook_violation']['total']}"
-        + (f" ({r['hook_violation']['by_hook']})"
-           if r['hook_violation'].get('by_hook') else ""),
+        f"- hook violation: {r['hook_violation']['total']}{_hv}",
         "",
         "## TASK 内訳",
         "",
