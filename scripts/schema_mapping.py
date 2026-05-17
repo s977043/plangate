@@ -41,6 +41,7 @@ FILENAME_TO_SCHEMA: dict[str, str] = {
     "plan-quality-check.json": "plan-quality-check.schema.json",
     "eval-comparison.json": "eval-comparison.schema.json",
     "context-manifest.json": "context-manifest.schema.json",
+    "keep-rate-result.json": "keep-rate-result.schema.json",
 }
 
 
