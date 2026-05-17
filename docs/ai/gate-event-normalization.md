@@ -13,8 +13,13 @@
 | **Gate event** | 通過可否・人間判断・検証結果を持つ | `c3_decided` / `c4_decided` / `v1_completed` / `external_review_completed` / `hook_violation` / `fix_loop_incremented` |
 | **非 Gate event** | 進行・生成・状態遷移 | `task_initialized` / `plan_generated` / `exec_started` / `pr_created` / `handoff_completed` |
 
-判定: `gate_id` が付与され、かつ status（下記 §3）に正規化できる event を
-Gate event とみなす。
+判定: `gate_id` が付与され、status（§3）に正規化できる event を Gate event と
+みなす。**status 入力が schema 上 optional な Gate event の扱い（V-3 MJ-1）**:
+- `external_review_completed`: `verdict` があれば §3 で正規化。無ければ
+  `conditional`（レビュー実施済だが判定未確定）として扱い signal を落とさない。
+- `fix_loop_incremented`: status を持たない進行 signal。`fix_loop_count` を
+  メタとして保持し status は `skipped`（gate 判定対象外）に正規化。
+  Dogfooding Eval(#231) は count を別途参照する。
 
 ## 2. gate_id 命名規則
 
@@ -30,8 +35,12 @@ Gate event とみなす。
 | 引き継ぎ | `handoff` |
 | 強制 Hook | `EH-1`〜`EH-9` / `EHS-1`〜`EHS-3` |
 
-`phase`（§4）と一致させる。未知 gate_id（pattern OK でも上表外）は
-「未正規化」として扱い、reporter / eval は警告対象にしてよい（破棄しない）。
+**gate_id と phase の関係（V-3 MJ-2 反映）**: workflow/承認 gate（C-x/V-x/L-0/
+handoff）は gate_id と phase が一致する。一方 **hook gate（EH-x/EHS-x）は
+gate_id が phase enum に無く、phase は「その hook が発火した WF/Gate」を指す**
+（例: `gate_id:"EH-3"`, `phase:"WF-04"`）。両者は別軸であり一致を要求しない。
+未知 gate_id（pattern OK でも上表外）は「未正規化」として扱い、
+reporter / eval は警告対象にしてよい（破棄しない）。
 
 ## 3. status 正規化マップ
 
@@ -41,15 +50,16 @@ Gate event とみなす。
 | 正規 status | 元の表現（verdict / hook_result / 監査 level / c3_status） |
 |------------|--------------------------------------------------------|
 | `pass` | `APPROVED` / `PASS` / `pass` |
-| `fail` | `REJECTED` / `FAIL` / `block` / `VIOLATION` |
+| `fail` | `REJECTED` / `FAIL` / `block` / `BLOCK` / `VIOLATION` / `MAINTENANCE_INVALID`（fail-closed）/ `SKIP_BLOCKED`（理由欠如で SKIP 拒否＝release blocker） |
 | `conditional` | `CONDITIONAL` / `WARN` / `warn` / `WARNING` / `REQUEST_CHANGES` |
-| `skipped` | `SKIP` / `SKIP_BLOCKED`（理由欠如で SKIP 拒否は `fail` 寄りだが
-  「未実行」として `skipped` + audit）/ `MAINTENANCE_SKIP` |
-| `bypassed` | `BYPASS`（`PLANGATE_BYPASS_HOOK=1`）/ `MAINTENANCE_INVALID` は
-  `fail`（fail-closed）として扱う |
+| `skipped` | `SKIP` / `MAINTENANCE_SKIP`（規約に沿った未実行）。`INCREMENT`（fix_loop_incremented）も gate 判定対象外として `skipped`＋count メタ保持 |
+| `bypassed` | `BYPASS`（`PLANGATE_BYPASS_HOOK=1` の明示的強制解除のみ） |
 
-> 注: `skipped` と `bypassed` は監査上区別する（skipped=規約に沿った未実行 /
-> bypassed=明示的強制解除）。reporter / eval は正規 status で横断集計する。
+> 注: 機械実装の決定論性のため (1) `SKIP_BLOCKED`（SKIP_REASON 欠如での
+> SKIP 拒否）は **`fail`**（Dogfooding Eval の release blocker）、
+> (2) `MAINTENANCE_INVALID` は **`fail`**（fail-closed）、(3) `BYPASS` のみ
+> `bypassed`、(4) 規約準拠の未実行（`SKIP`/`MAINTENANCE_SKIP`/`INCREMENT`）は
+> `skipped` と一意に定める。reporter / eval は正規 status で横断集計する。
 
 ## 4. phase 許容値 ↔ WF / Gate 対応表
 

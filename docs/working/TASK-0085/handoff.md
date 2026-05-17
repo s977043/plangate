@@ -15,6 +15,11 @@ status: done
 | AC-5 後方互換 | PASS | schema enum 不変・1.0 sample valid・regression なし |
 | AC-6 #228/#229 整合 | PASS | gate_id/phase #229 一致・#228 5項目矛盾なし |
 | AC-7 回帰なし | PASS | hook 78/0・CLI 64/0・schema-self valid |
+## 1-bis. V-3 fix-loop（Codex major3/minor1 / Gemini PASS）
+Codex critical0。fix-loop: MJ-1(optional status signal 保持)/MJ-2(gate_id↔phase
+は hook gate で別軸明記・矛盾解消)/MJ-3(BLOCK/INCREMENT/MAINTENANCE_INVALID
+status 表一意化)/mn-1(SKIP_BLOCKED=fail 固定)。再 V-1 PASS・hook78/CLI64。
+
 ## 2. 既知課題一覧
 正規化は「ビュー」（schema enum 不変）。reporter/eval 適用は #231 で実装
 ## 3. V2 候補
