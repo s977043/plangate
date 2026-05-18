@@ -23,6 +23,17 @@ V-3 で ta-11 冒頭コメント旧仕様矛盾/未使用関数を是正。
 ## 4. 妥協点
 - 抽出のみ strict 化（block/warn 判定・plan_hash 形式・c3 schema・util は不変）。
 - python3 heredoc は fail-open（空→SKIP）だが repo 全体 Python 前提・:108 前例。
+- **意図的に inline 維持（plan_hash_util.py を import しない）**。#285
+  gemini-code-assist が DRY 重複排除（util 直接 import）を minor 指摘したが
+  **不採用**。EH-3 は承認境界の実行正本であり、`scripts/plan_hash_util.py`
+  への import 依存を足すと「util の移動/削除/構文エラー/path 解決ミス →
+  import 失敗 → 空 → 黙って SKIP」で承認境界の検知可用性が低下する
+  （inline は `python3 + stdlib json` のみで自己完結＝より堅牢）。
+  重複は ~10 行・minor で DRY の実利は限定的（YAGNI）。plan_hash_util.py
+  docstring の Non-goal「EH-3 shell 実行経路は変更しない」とも整合。
+  `plan_hash_util` との意味一致は **ta-11 が parity 契約で固定**。将来
+  hook import 方針を正式化する場合は plan_hash_util.py docstring の
+  「EH-3 shell 正本」前提も同時更新すること（Codex 相談合意・V-3 補強）。
 
 ## 5. 引き継ぎ
 #282 完遂。check-plan-hash.sh の plan_hash 抽出を寛容 sed→strict python
