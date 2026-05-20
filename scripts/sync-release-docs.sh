@@ -6,7 +6,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$ROOT/CHANGELOG.md"
 DST="$ROOT/docs/changelog.md"
 [ -f "$SRC" ] || { echo "error: $SRC not found" >&2; exit 1; }
-tmp="$(mktemp)"
+tmp="$(mktemp -t sync-docs.XXXXXX 2>/dev/null || mktemp)"
+trap 'rm -f "$tmp"' EXIT
 {
   printf '# Changelog\n\n'
   printf '> このページは [CHANGELOG.md](https://github.com/s977043/PlanGate/blob/main/CHANGELOG.md) を\n'
@@ -15,8 +16,8 @@ tmp="$(mktemp)"
 } > "$tmp"
 if [ -f "$DST" ] && diff -q "$tmp" "$DST" >/dev/null 2>&1; then
   echo "no-op: docs/changelog.md is already in sync"
-  rm -f "$tmp"
   exit 0
 fi
 mv "$tmp" "$DST"
+trap - EXIT
 echo "synced: docs/changelog.md"
