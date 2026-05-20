@@ -7,7 +7,7 @@
 - **Phase**: C-1 v2 完了（外部レビュー R-001〜R-011 確定反映後）(C-3 ゲート待ち = Human-owned)
 - **Mode 判定（参考）**: high-risk（critical 候補）
 - **Labels**: `enhancement` / `priority:P2`
-- **Status**: PBI INPUT PACKAGE のみ作成済。plan/todo/test-cases は **C-3 ゲート前**の生成段階で着手
+- **Status**: PBI INPUT PACKAGE / plan / todo / test-cases / review-self (v2) / review-external 作成済。**C-3 ゲート待ち (Human-owned)**
 
 ## Files
 

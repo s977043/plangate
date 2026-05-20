@@ -68,10 +68,12 @@
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| 承認境界の意図せぬ緩和（hook 改修ミスで env 経路で有効化される 等） | **critical** | env 経路での無効化を unit test で固定、Hardening Override をデフォルト ON |
-| one-shot consume の race condition (2 並行 Edit) | high | `consumed_at` 書込を atomic に（tmp file + rename）。読み出し時に再検証 |
+| 承認境界の意図せぬ緩和（hook 改修ミスで env 経路で有効化される 等） | **critical** | env 経路での無効化を unit test で固定、Hardening Override をデフォルト ON、`start` の TTY 要求を unit test で固定（R-001/R-011） |
+| one-shot consume の race condition (2 並行 Edit) | **critical** | **python3 `os.replace(tmp, target)` で atomic 書込**、書込前に mtime/inode 先取り検出、競合検出時 **fail-closed (block)**。`flock` 等のファイルロックを追加検討余地あり（R-002 / gemini #299 指摘反映） |
 | path glob の解釈差異 (sh case vs python fnmatch) | medium | EH-3 が sh なので sh case パターンで統一・テストで多パターン検証 |
-| 既存 30 分窓との後方互換破壊 | high | 既存テストを必ず維持 + 新フィールド unknown 時のデフォルト動作を「既存挙動と同じ」に固定 |
+| 既存 30 分窓との後方互換破壊 | high | 既存テストを必ず維持 + 新フィールド unknown 時のデフォルト動作を「Override 対象パス以外は既存挙動と同じ」に固定（R-004） |
+| Hardening Override と後方互換の衝突 | **major** | 既存 30 分窓「任意 path PASS」は **Override 対象パス以外**に限定する旨を明文化（R-004） |
+| 新設フィールド読出での寛容な抽出による bypass | **major** | strict JSON 抽出パターン (#282/TASK-0105) を新設 `allowed_paths`/`one_shot`/`consumed_at` 読出にも適用（R-009） |
 
 ## Questions / Unknowns
 

@@ -20,7 +20,7 @@ PBI INPUT PACKAGE v2 + plan v2 + todo + test-cases (TC-31 まで) + review-self 
 
 ## ブロッカー
 
-- なし（plan 生成待ちのみ）
+- なし（C-3 ゲート判定待ち）
 
 ## 注意点
 
