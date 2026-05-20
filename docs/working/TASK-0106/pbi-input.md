@@ -23,14 +23,17 @@ EH-3 を迂回しており、運用負荷が継続的に発生している。
 
 ### In scope
 
-- `bin/plangate maintenance` サブコマンド新設（**人間が実行する CLI**＝
+- `bin/plangate maintenance` サブコマンド新設（**Human-owned 実行**＝
   AI 自己付与不可を構造的に維持）
-  - `start --reason "<理由>" [--paths <glob,...>] [--minutes <n>]` で
+  - `start --reason "<理由>" [--paths <glob,...>] [--minutes <n>] [--force]` で
     `schemas/maintenance.schema.json` 準拠の
     `docs/working/_maintenance/maintenance.json` を生成
+  - **Human-owned 強制**: `start` は対話 TTY を要求し、非対話実行・CI 実行・
+    エージェント実行は **reject**（AI から CLI 起動でも自己付与不可）（R-001）
   - `stop` で即時失効
   - **既定束縛**: one-shot（単回 Edit/Write で消費・自動無効化） +
-    対象パススコープ（`allowed_paths`） + 短い TTL（既定短め・ハード上限あり）
+    対象パススコープ（`allowed_paths`） + **TTL 既定 5 分・ハード上限 30 分**（R-008）
+  - **既存有効ファイル存在時の挙動**: `--force` なしでは上書き拒否（R-005, AC-9）
 - EH-3 hook 側で one-shot 消費・パススコープ判定・TTL 判定を実装
 - `bin/plangate doctor` に maintenance 窓の残時間/スコープ可視化
 - schema 拡張: `allowed_paths` / `one_shot` / `consumed_at` フィールド追加
@@ -48,12 +51,19 @@ EH-3 を迂回しており、運用負荷が継続的に発生している。
       `maintenance.json` が生成される
 - [ ] 生成された承認下で no-task の対象 Edit/Write が 1 回通り、
       その後 one-shot 消費で自動無効化される
-- [ ] `--paths` 指定外のファイル（特に `.claude/rules/*.md`）は
-      窓内でも block される
-- [ ] TTL 超過後は窓内であっても block され、ハード上限を超える
-      `--minutes` は拒否される
-- [ ] AI（hook/CLI）からは承認を自己発行できない
-      （人間実行のみ。env 経路では有効化しない既存性質を維持）
+- [ ] `--paths` 指定外、および **Hardening Override 対象パス**（.claude/rules/*.md,
+      .claude/settings*.json, .claude/commands/*.md, .claude/agents/*.md,
+      scripts/hooks/*.sh, bin/plangate, schemas/*.schema.json,
+      .github/workflows/*.yml, AGENTS.md, CLAUDE.md）は窓内でも常時 block される（R-003）
+- [ ] TTL 超過後は窓内であっても block され、ハード上限（30 分）を超える
+      `--minutes` は拒否される。既定 TTL は 5 分（R-008）
+- [ ] AI（hook/CLI）からは承認を自己発行できない:
+      `maintenance start` は **対話 TTY を要求**し非対話/CI/agent 実行は reject、
+      かつ env 経路では有効化しない（R-001, R-011）
+- [ ] **AC-9**: 既存有効な maintenance.json が存在する状態での `maintenance start`
+      は `--force` なしでは exit 非0 で上書き拒否される（R-005, R-010）
+- [ ] **AC-10**: 新設フィールド（allowed_paths/one_shot/consumed_at）の判定も
+      env 経由では有効化されない（ファイル存在のみを正本とする）（R-011）
 - [ ] `bin/plangate doctor` が有効な maintenance 窓の残時間と
       スコープを表示する
 - [ ] 既存 `maintenance.json`（30 分窓・パス無指定）が後方互換で動作する
@@ -67,30 +77,45 @@ EH-3 を迂回しており、運用負荷が継続的に発生している。
   人間しか満たせない条件（例: 直近 TTY 入力検証）を経由させる設計
 - one-shot の atomicity: EH-3 が consume するタイミングで file を
   delete/move/`consumed_at` 設定 のいずれかで atomically 無効化
-- Hardening Override: `.claude/rules/*.md` `.claude/settings*.json`
-  `scripts/hooks/*.sh` は **maintenance 窓内でも除外**（重要 infra は
-  別承認ルート必須）の検討余地あり
+- **Hardening Override（必須採用）**: maintenance 窓内でも以下は常時 block
+  （AC-3 でも明示）。重要 infra への変更は別承認ルートを必要とする（R-003）:
+  - `.claude/rules/*.md` / `.claude/settings*.json`
+  - `.claude/commands/*.md` / `.claude/agents/*.md`
+  - `scripts/hooks/*.sh`
+  - `bin/plangate`
+  - `schemas/*.schema.json`
+  - `.github/workflows/*.yml`
+  - `AGENTS.md` / `CLAUDE.md`
 
 ## Estimation Evidence
 
 ### Risks
 
 - EH-3 は **承認境界実行正本**。改修ミス = 承認境界破壊リスク
-- one-shot の consume タイミングが間違うと 0 回 or 2 回以上通る
-- 既存 30 分窓との後方互換維持
+- **one-shot consume の race condition**: tmp+rename だけでは並行 hook
+  が両方とも未消費読みで通過するリスク → `python3 os.replace()` で
+  atomic 書込・書込前に mtime/inode 先取り検出・競合検出時 fail-closed
+  (block) を必須化（R-002, severity = critical）
+- 既存 30 分窓との後方互換維持（Override 対象パス以外は既存挙動と同じ）（R-004）
+- 新設フィールド読出での寛容抽出による bypass → strict JSON 抽出
+  パターン (#282/TASK-0105) を新設フィールド読出にも適用（R-009）
 
 ### Unknowns
 
-- one-shot consume の atomicity 実装方式（rename / delete / state file）
-- doctor 表示の TTL 計算粒度（秒/分）
-- Hardening Override 対象パスの確定範囲
+- ~~one-shot consume atomicity 実装方式~~ → **確定**: python3
+  `os.replace(tmp, target)` で atomic 書込（R-002）
+- ~~doctor 表示の TTL 計算粒度~~ → **確定**: 分:秒表示、JSON 出力では
+  UNIX epoch + 残秒（R-006）
+- ~~Hardening Override 対象パス~~ → **確定**: 上記 Hardening Override
+  リスト（R-003）
+- ~~既存有効窓上書き仕様~~ → **確定**: `--force` なしで reject（AC-9）
 
 ### Assumptions
 
 - `schemas/maintenance.schema.json` を additive に拡張（既存フィールド削除なし）
 - 既存 EH-3 の strict JSON 抽出（#282/TASK-0105 で確立）はそのまま流用
-- `bin/plangate maintenance start` 自体は AI が起動可能（生成される
-  承認ファイルが env では効かない設計＝AI 自己付与不可を担保）
+- `bin/plangate maintenance start` は **対話 TTY を要求し AI 起動不可**。
+  生成される承認ファイル自体も env では効かない多重防御（R-001）
 
 ## Mode 判定（参考）
 

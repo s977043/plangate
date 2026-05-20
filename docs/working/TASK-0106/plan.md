@@ -10,9 +10,13 @@
 ## Constraints / Non-goals
 
 ### Constraints
-- **承認境界の構造的維持**: AI（hook/CLI）からは承認を自己発行不可。env 経路では有効化させない既存性質を不変条件とする
-- **承認境界実行正本（EH-3）を破壊しない**: 既存 30 分窓の動作・strict JSON 抽出（#282/TASK-0105）はそのまま流用
-- **Hardening Override（最上位）**: `.claude/rules/*.md`、`.claude/settings*.json`、`scripts/hooks/*.sh` は maintenance 窓内でも常に **block**（重要 infra は別承認ルート必須）
+- **承認境界の構造的維持**: AI（hook/CLI）からは承認を自己発行不可。`maintenance start` は **対話 TTY 要求で非対話/CI/agent 実行を reject**、生成承認ファイルも env では有効化しない多重防御（R-001/R-011）
+- **承認境界実行正本（EH-3）を破壊しない**: 既存 30 分窓の動作・strict JSON 抽出（#282/TASK-0105）はそのまま流用し、新設フィールド読出にも strict 適用（R-009）
+- **Hardening Override（最上位）**: maintenance 窓内でも以下は常時 **block**（R-003）:
+  - `.claude/rules/*.md` / `.claude/settings*.json` / `.claude/commands/*.md` / `.claude/agents/*.md`
+  - `scripts/hooks/*.sh` / `bin/plangate` / `schemas/*.schema.json`
+  - `.github/workflows/*.yml` / `AGENTS.md` / `CLAUDE.md`
+- **後方互換 vs Override 境界**: 既存 30 分窓（パス無指定）は「Override 対象パス**以外**は全パス許可」と扱い、Override 対象パスは新旧問わず常時 block（R-004）
 
 ### Non-goals
 - docs-only fast path の EH-3 への無条件追加（scope 限定承認で代替）
@@ -21,7 +25,7 @@
 
 ## Approach Overview
 
-`schemas/maintenance.schema.json` を **additive 拡張**（`allowed_paths`/`one_shot`/`consumed_at` を optional 追加、既存フィールド変更なし）。`bin/plangate maintenance start|stop` で `docs/working/_maintenance/maintenance.json` を生成/削除。EH-3 hook が `consumed_at` を atomic 更新して one-shot 消費・path scope check・TTL check を実行。`bin/plangate doctor` に表示行追加。
+`schemas/maintenance.schema.json` を **additive 拡張**（`allowed_paths`/`one_shot`/`consumed_at` を optional 追加、既存フィールド変更なし、`additionalProperties:false` 維持）。`bin/plangate maintenance start|stop` で `docs/working/_maintenance/maintenance.json` を生成/削除（start は **対話 TTY 要求**、`--force` で上書き許可）。EH-3 hook が python3 `os.replace(tmp, target)` で `consumed_at` を **atomic 更新**して one-shot 消費・path scope check・TTL check・**Hardening Override** を実行。書込前に mtime/inode 先取り検出、競合時 fail-closed (block)。`bin/plangate doctor` に表示行 + `--json` 構造化出力（`scripts/doctor_check.py` 経由）（R-006）。
 
 ## Work Breakdown
 
@@ -29,9 +33,10 @@
 |---|------|--------|-------|------|--------------|
 | 1 | schema 拡張 (`additionalProperties:false` 維持・新フィールドは optional) | `schemas/maintenance.schema.json` v2 | AI | low | 既存 schema test PASS |
 | 2 | `bin/plangate maintenance start/stop` CLI 実装 (--reason/--paths/--minutes、ハード上限 30 分、`--reason` 必須) | `bin/plangate` | AI | medium | start で schema valid な JSON 生成、stop で削除 |
-| 3 | EH-3 hook 改修: path scope check (sh glob) + TTL check + one-shot consume (atomic write `consumed_at`) | `scripts/hooks/check-plan-hash.sh` | AI | **high** (承認境界) | 既存 30 分窓テスト PASS + 新動作テスト PASS |
-| 4 | Hardening Override 実装: `.claude/rules/*.md` / `.claude/settings*.json` / `scripts/hooks/*.sh` は窓内でも block | EH-3 hook 内 | AI | high | Override 対象パスは scope 内でも block されるテスト PASS |
-| 5 | `bin/plangate doctor` 表示行追加: 有効窓があれば「scope/remaining/paths」 | `bin/plangate` | AI | low | doctor 出力テスト PASS |
+| 3 | EH-3 hook 改修: path scope check (sh glob) + TTL check + one-shot consume (python3 `os.replace` で atomic 書込、書込前 mtime/inode 先取り検出、競合時 fail-closed)（R-002） | `scripts/hooks/check-plan-hash.sh` | AI | **critical** (承認境界) | 既存 30 分窓テスト PASS + 並行競合テスト PASS + fail-closed 確認 |
+| 4 | Hardening Override 実装: 拡張リスト（.claude/rules/, .claude/settings*, .claude/commands/, .claude/agents/, scripts/hooks/, bin/plangate, schemas/, .github/workflows/, AGENTS.md, CLAUDE.md）は窓内でも block。新旧 maintenance.json 双方に適用（R-003/R-004） | EH-3 hook 内 | AI | **critical** | Override 対象 10 パターンの block テスト PASS |
+| 5a | `bin/plangate doctor` 表示行追加: 有効窓「scope/remaining (mm:ss)/paths」 | `bin/plangate` | AI | low | doctor 出力テスト PASS |
+| 5b | `scripts/doctor_check.py` の JSON 構造化出力に maintenance 状態を追加（R-006） | `scripts/doctor_check.py` | AI | low | `bin/plangate doctor --json` で maintenance フィールド検証 PASS |
 | 6 | テスト追加: CLI 単体・hook 単体・E2E (start→edit→consume→re-block) | `tests/extras/ta-XX-maintenance.sh`、`tests/hooks/*` | AI | medium | 全テスト + 既存 68/78 PASS 維持 |
 | 7 | docs 整備: `docs/ai/maintenance-cli.md`（運用 guide） | docs | AI | low | リンク健全 |
 | 8 | handoff.md 作成 + V-1 受け入れ検査 | TASK-0106/handoff.md | AI | low | 全 AC PASS 確認 |
@@ -42,7 +47,8 @@
 |---------|------|
 | `schemas/maintenance.schema.json` | 拡張 (additive) |
 | `bin/plangate` | サブコマンド追加 (maintenance) + doctor 表示行 |
-| `scripts/hooks/check-plan-hash.sh` | path/TTL/one-shot 判定追加・Hardening Override |
+| `scripts/hooks/check-plan-hash.sh` | path/TTL/one-shot 判定追加・Hardening Override・python3 `os.replace` atomic 書込（R-002） |
+| `scripts/doctor_check.py` | maintenance 窓の JSON 構造化出力追加（R-006） |
 | `tests/extras/ta-XX-maintenance.sh` | 新規 |
 | `tests/hooks/run-tests.sh` | 既存に maintenance 系追加 |
 | `docs/ai/maintenance-cli.md` | 新規（運用 guide） |
@@ -51,10 +57,12 @@
 ## Testing Strategy
 
 - **Unit (CLI)**: `maintenance start` で schema valid な JSON 生成 / `stop` で削除 / `--minutes` ハード上限拒否 / `--reason` 必須エラー
-- **Unit (hook)**: path glob match / TTL 内/外 / one-shot consumed_at が未設定で通過・設定後 block / Hardening Override 対象は窓内でも block
+- **Unit (CLI 自己付与防止)**: 非対話実行 / CI 環境変数 / agent 実行 / TTY 偽装で `start` reject（R-001/R-011）
+- **Unit (hook)**: path glob match / TTL 内/外 / one-shot consumed_at が未設定で通過・設定後 block / Hardening Override 拡張リスト 10 パターンすべて窓内でも block / 並行競合で fail-closed
 - **Integration (E2E)**: `maintenance start --paths "README.md" --minutes 5` → no-task で README.md Edit 通過 (consumed_at 書込) → 同じ承認で 2 回目 Edit が block → stop で完全失効
-- **Backward compat**: 既存 30 分窓・パス無指定 maintenance.json が引き続き動作
-- **回帰**: 既存 `tests/run-tests.sh` 68 PASS + `tests/hooks/run-tests.sh` 78 PASS 維持
+- **Backward compat**: 既存 30 分窓・パス無指定 maintenance.json が「Override 対象パス以外は許可」で動作（R-004）
+- **Runner 統合 (TC-23)**: `tests/run-tests.sh` 実行で新規 ta-XX-maintenance.sh と既存 hook テストが呼び出され全 PASS する（R-007）
+- **回帰**: 既存 `tests/run-tests.sh` 68 PASS + `tests/hooks/run-tests.sh` 78+ PASS 維持
 
 ## Risks & Mitigations
 
@@ -67,10 +75,13 @@
 
 ## Questions / Unknowns
 
-- one-shot の consume granularity: 単一 Edit/Write 操作で 1 回？それとも単一 ツール呼び出しで 1 回？（要決定: **単一 Edit/Write 操作で 1 回** を案）
-- doctor 表示の TTL 粒度（秒/分）→ **分:秒表示** 案
-- `--paths` 未指定時の動作: (a) 全パス許可（既存 30 分窓互換）/ (b) エラー（明示必須）→ **(a) 後方互換維持** 案
-- `bin/plangate maintenance start` を AI 起動可とするか: **可**（生成承認ファイルが env では効かない設計で AI 自己付与不可を担保） — pbi-input 仮定どおり
+全 Unknowns は外部レビュー (review-external.md) を経て確定済:
+
+- one-shot consume granularity → **単一 Edit/Write 操作で 1 回** 確定
+- doctor 表示の TTL 粒度 → **分:秒表示** + `--json` で UNIX epoch+残秒（R-006）確定
+- `--paths` 未指定時の動作 → **Override 対象パス以外は許可（後方互換維持）**（R-004）確定
+- `maintenance start` 実行主体 → **AI 起動不可（対話 TTY 要求）**（R-001）確定
+- 既存有効窓上書き → **`--force` なしで reject（AC-9）**（R-005）確定
 
 ## Mode 判定
 

@@ -13,12 +13,13 @@
 - [ ] **T-04**: `bin/plangate maintenance start/stop` CLI 実装 — TDD（失敗テスト先 → 実装 → green）（owner=agent / Risk=medium / depends_on=T-03 / 🚩 CLI 単体 PASS）
 - [ ] **T-05**: EH-3 hook 改修 — path scope check + TTL check + atomic one-shot consume（owner=agent / Risk=**high** / depends_on=T-04 / 🚩 既存 30 分窓テスト PASS + 新動作テスト PASS + 承認境界回帰なし）
 - [ ] **T-06**: Hardening Override 実装（`.claude/rules/*.md` / `.claude/settings*.json` / `scripts/hooks/*.sh` を窓内でも block）（owner=agent / Risk=high / depends_on=T-05 / 🚩 Override 対象パスの block テスト PASS）
-- [ ] **T-07**: `bin/plangate doctor` に有効窓表示行追加（owner=agent / Risk=low / depends_on=T-04 / 🚩 doctor 出力テスト PASS）
+- [ ] **T-07a**: `bin/plangate doctor` テキスト出力に有効窓表示行追加（owner=agent / Risk=low / depends_on=T-04 / 🚩 doctor 出力テスト PASS）
+- [ ] **T-07b**: `scripts/doctor_check.py` JSON 構造化出力に maintenance 状態追加（R-006）（owner=agent / Risk=low / depends_on=T-07a / 🚩 `doctor --json` で maintenance フィールド PASS）
 
 ### Phase 3: 検証
 - [ ] **T-08**: E2E テスト（start→edit 1回通過→consume→2回目 block→stop で完全失効）（owner=agent / Risk=medium / depends_on=T-05/T-06 / 🚩 E2E PASS）
 - [ ] **T-09**: 後方互換テスト — 既存 30 分窓 maintenance.json が動作（owner=agent / Risk=high / depends_on=T-05 / 🚩 既存 78 hook PASS + 68 CLI PASS 維持）
-- [ ] **T-10**: 承認境界回帰テスト — env 経路では maintenance 有効化されない（AI 自己付与防止）（owner=agent / Risk=**critical** / depends_on=T-05 / 🚩 env 経由 block 確認）
+- [ ] **T-10**: 承認境界回帰テスト — env 経路では maintenance 有効化されない + `maintenance start` は非対話/CI/agent 実行で reject（R-001/R-011）（owner=agent / Risk=**critical** / depends_on=T-05 / 🚩 TC-10/TC-25/TC-26/TC-29 全 PASS）
 
 ### Phase 4: 完了
 - [ ] **T-11**: `docs/ai/maintenance-cli.md` 運用 guide 作成（owner=agent / Risk=low）

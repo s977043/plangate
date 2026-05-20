@@ -6,14 +6,16 @@
 
 | AC | TC IDs |
 |----|--------|
-| AC-1: `bin/plangate maintenance start --reason "..."` で schema valid な maintenance.json 生成 | TC-01, TC-02 |
+| AC-1: `bin/plangate maintenance start --reason "..."` で schema valid な maintenance.json 生成（TTY 要求下） | TC-01, TC-02 |
 | AC-2: 生成承認下で no-task の対象 Edit/Write が 1 回通り、その後 one-shot 消費で自動無効化 | TC-03, TC-04, TC-05 |
-| AC-3: `--paths` 指定外（特に `.claude/rules/*.md`）は窓内でも block | TC-06, TC-07 |
-| AC-4: TTL 超過後は block、ハード上限超え `--minutes` は拒否 | TC-08, TC-09 |
-| AC-5: AI（hook/CLI）からは承認を自己発行不可（env 経路で有効化しない） | TC-10 |
-| AC-6: `bin/plangate doctor` が有効窓の残時間・スコープ表示 | TC-11 |
-| AC-7: 既存 30 分窓 maintenance.json（パス無指定）が後方互換動作 | TC-12 |
-| AC-8: ユニットテストが `tests/run-tests.sh` で検証可能 | (テスト導入そのもの) |
+| AC-3: Hardening Override 対象 + `--paths` 指定外は窓内でも block | TC-06, TC-07, **TC-24** |
+| AC-4: TTL 超過後 block、ハード上限超え `--minutes` 拒否（既定 5 分・上限 30 分） | TC-08, TC-09 |
+| AC-5: AI から自己発行不可（TTY 要求＋env 無効） | TC-10, **TC-25**, **TC-26** |
+| AC-6: `bin/plangate doctor` 表示 + `--json` 構造化 | TC-11, **TC-27** |
+| AC-7: 既存 30 分窓（Override 対象パス以外）後方互換 | TC-12 |
+| AC-8: ユニットテストが `tests/run-tests.sh` で検証可能 | **TC-23** (R-007) |
+| **AC-9**: 既存有効窓で `start --force` なしは reject | **TC-28** (R-005/R-010) |
+| **AC-10**: 新設フィールド判定も env では有効化不可 | **TC-29** (R-011) |
 
 ## テストケース一覧
 
@@ -53,9 +55,18 @@
 - TC-17: schema 拡張で additionalProperties:false 維持されている（不正キー入りで validate FAIL）
 - **TC-18**: `bin/plangate maintenance start --reason ""` または `--reason "   "`（空白のみ）→ exit 非0（reason 必須・空白拒否）
 - **TC-19**: `--paths` 未指定で start → 後方互換どおり「全パス許可」動作（既存 30 分窓と同等）。allowed_paths フィールドは省略され Hardening Override のみ機能
-- **TC-20**: 既存有効な maintenance.json がある状態で再度 `maintenance start` → exit 非0（"already active" エラー）または明示的な `--force` のみ上書き許可（仕様は exec 着手時に確定、本 TC は後者ケース想定）
+- **TC-20**: 既存有効な maintenance.json がある状態で再度 `maintenance start --reason "x"` (no --force) → exit 非0 "already active maintenance window" reject（R-005/R-010 → AC-9）
 - **TC-21**: consumed_at が既に設定された one_shot=true の maintenance.json が残存している状態で `maintenance start` 新規呼び出し → 既存ファイルを atomic に置換（古い consumed_at は引き継がず初期化）
 - **TC-22**: non-UTF-8 path (例: shift-jis 環境変数や filesystem encoding 不一致) でのふるまい → documented limitation として「UTF-8 環境を前提」を pbi-input.md / docs/ai/maintenance-cli.md に明記。テストは UTF-8 環境前提で skip 可
+- **TC-23 (AC-8)**: `tests/run-tests.sh` 実行で新規 ta-XX-maintenance.sh と既存 hook テストが順次呼び出され全 PASS する（runner 統合確認）（R-007）
+- **TC-24 (AC-3)**: Hardening Override 対象パス 10 種（`.claude/rules/*.md`, `.claude/settings*.json`, `.claude/commands/*.md`, `.claude/agents/*.md`, `scripts/hooks/*.sh`, `bin/plangate`, `schemas/*.schema.json`, `.github/workflows/*.yml`, `AGENTS.md`, `CLAUDE.md`）すべて窓内でも block（R-003）
+- **TC-25 (AC-5)**: 非対話実行 (stdin が tty でない、CI=true、agent 環境) で `bin/plangate maintenance start` → exit 非0 "interactive TTY required" reject（R-001）
+- **TC-26 (AC-5)**: TTY 偽装試行（agent から AI CLI 経由で起動）→ reject + 痕跡 hook-events.log 記録（R-001）
+- **TC-27 (AC-6)**: `bin/plangate doctor --json` で `maintenance` キーに `{scope, until_epoch, remaining_seconds, paths, one_shot, consumed_at}` を含む（R-006）
+- **TC-28 (AC-9)**: 既存有効窓で `start --force` → atomic 置換、consumed_at 初期化、CLI が再度 TTY 要求（R-005/R-010）
+- **TC-29 (AC-10)**: 新設フィールド (allowed_paths/one_shot/consumed_at) も env 経由 (`PLANGATE_MAINT_ONE_SHOT=true` 等) では有効化不可（R-011）
+- **TC-30 (R-002 race)**: 並行 hook 2 実行 → 1 つだけ通過、もう片方は競合検出 fail-closed で block。`os.replace` の atomicity verify
+- **TC-31 (R-009 strict)**: 新設フィールド読出に不正 JSON 構造（偽プロパティ・不正型）→ strict JSON 抽出で reject（block）
 
 ## 自動化可否
 
