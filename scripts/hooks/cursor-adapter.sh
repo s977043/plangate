@@ -77,21 +77,28 @@ if [ -n "$FILE_PATH" ]; then
   esac
 fi
 
-# Run Claude-format hook; capture last JSON line on stdout
-HOOK_OUT=$(sh "$HOOK_SCRIPT" 2>/dev/null | tail -n 1) || HOOK_OUT='{"continue":true}'
+# Run Claude-format hook; capture last JSON line on stdout.
+# Use python3 for robust JSON parse/generate (avoids fragile sed/printf escaping
+# when stopReason contains double quotes, newlines, or other special characters).
+# stderr is not suppressed so hook warnings remain debuggable.
+HOOK_OUT=$(sh "$HOOK_SCRIPT" | tail -n 1) || HOOK_OUT='{"continue":true}'
 
-CONTINUE=$(printf '%s\n' "$HOOK_OUT" | sed -n 's/.*"continue"[[:space:]]*:[[:space:]]*\([^,}]*\).*/\1/p' | tr -d ' ')
-STOP=$(printf '%s\n' "$HOOK_OUT" | sed -n 's/.*"stopReason"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+python3 - "$HOOK_OUT" "$HOOK_NAME" <<'PYEOF'
+import json, sys
+try:
+    hook_out = json.loads(sys.argv[1])
+except Exception:
+    hook_out = {"continue": True}
+hook_name = sys.argv[2]
 
-case "$CONTINUE" in
-  false)
-    REASON=${STOP:-PlanGate hook blocked this edit}
-    printf '{"permission":"deny","user_message":"%s","agent_message":"%s (via %s)"}\n' \
-      "$REASON" "$REASON" "$HOOK_NAME"
-    exit 0
-    ;;
-  *)
-    printf '{"permission":"allow"}\n'
-    exit 0
-    ;;
-esac
+if hook_out.get("continue") is False:
+    reason = hook_out.get("stopReason", "PlanGate hook blocked this edit")
+    print(json.dumps({
+        "permission": "deny",
+        "user_message": reason,
+        "agent_message": f"{reason} (via {hook_name})",
+    }, separators=(",", ":")))
+else:
+    print(json.dumps({"permission": "allow"}, separators=(",", ":")))
+PYEOF
+exit 0
