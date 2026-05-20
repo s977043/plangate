@@ -45,7 +45,7 @@ PlanGate は **すべての機能を最初から使う必要はありません**
 | **Level 5** | + eval / timeline | dogfooding eval、experimental timeline などの上級機能 |
 
 初回利用者は **Level 1 から始める** ことを推奨します。Level 4 以降は経験を積んでから検討してください。
-詳細ガイド: [Issue #226 段階的導入ガイド](https://github.com/s977043/plangate/issues/226)（v8.7.0 でリリース済）
+詳細ガイド: [段階的導入ガイド](docs/staged-adoption-guide.md)（v8.7.0 でリリース済）
 
 ```mermaid
 flowchart LR

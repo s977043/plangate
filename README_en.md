@@ -45,7 +45,7 @@ You **don't need to use all features from the start**. Adopt only what you need 
 | **Level 5** | + eval / timeline | Advanced features: dogfooding eval, experimental timeline |
 
 New users should **start at Level 1**. Consider Level 4+ only after gaining operational experience.
-Detailed guide: [Issue #226 Staged adoption guide](https://github.com/s977043/plangate/issues/226) (shipped in v8.7.0).
+Detailed guide: [Staged adoption guide](docs/staged-adoption-guide.md) (shipped in v8.7.0).
 
 ```mermaid
 flowchart LR
