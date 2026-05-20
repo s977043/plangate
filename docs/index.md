@@ -49,6 +49,6 @@ PlanGate は、一般的なハーネスエンジニアリングの考え方を P
 
 `docs/working/` 配下にはチケット単位の作業コンテキストやレビュー記録が含まれるため、公開サイトの主要導線には含めません。
 
-[pages-index]: {{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/pages/index.md
-[product-overview]: {{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/pages/explanation/product/overview.md
-[pm-po-pitch]: {{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/pages/explanation/product/pm-po-elevator-pitch.md
+[pages-index]: <{{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/pages/index.md>
+[product-overview]: <{{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/pages/explanation/product/overview.md>
+[pm-po-pitch]: <{{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/pages/explanation/product/pm-po-elevator-pitch.md>
