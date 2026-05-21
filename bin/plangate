@@ -675,6 +675,34 @@ PYEOF
     return 0
   fi
 
+  # TASK-0106 T-07a: maintenance 窓の有無を 1 行表示（doctor 全 scope 共通の補足）
+  _maint_file="$plangate_root/docs/working/_maintenance/maintenance.json"
+  if [ -f "$_maint_file" ]; then
+    _m=$(python3 - "$_maint_file" <<'PYM' 2>/dev/null || true
+import json, sys, time
+try:
+    d = json.load(open(sys.argv[1]))
+    now = int(time.time())
+    rem = max(0, int(d.get("until", 0)) - now)
+    one_shot = bool(d.get("one_shot", False))
+    consumed = d.get("consumed_at") is not None
+    active = (int(d.get("granted_at", 0)) <= now and rem > 0 and not consumed)
+    if active:
+        print(f"active remaining={rem//60:02d}:{rem%60:02d} scope={d.get('scope','')} one_shot={str(one_shot).lower()} paths={d.get('allowed_paths') or '(any non-Override)'}")
+    elif consumed:
+        print(f"consumed (one_shot) — re-issue with 'plangate maintenance start' if needed")
+    elif rem == 0:
+        print(f"expired — use 'plangate maintenance stop' to clean up")
+    else:
+        print("inactive")
+except Exception as e:
+    print(f"unparsable: {e}")
+PYM
+)
+    printf '\n=== Maintenance Window ===\n'
+    printf '  [INFO] %s\n' "$_m"
+  fi
+
   if [ "$failures" -eq 0 ]; then
     printf 'Result: PASS (all checks passed)\n'
   else
