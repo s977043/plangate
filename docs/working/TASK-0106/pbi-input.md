@@ -96,9 +96,12 @@ EH-3 を迂回しており、運用負荷が継続的に発生している。
 
 ## Notes from Refinement
 
-- **承認境界の構造的維持**: AI 自己付与は何があっても不可能でなければ
-  ならない。`bin/plangate maintenance start` は interactive 確認 or
-  人間しか満たせない条件（例: 直近 TTY 入力検証）を経由させる設計
+- **承認境界の維持（best-effort + 監査・R-012）**: AI 自己付与は **多層
+  防御（L1 isatty / L2 env barrier / L3 parent process heuristic / L4 対話
+  nonce `PLANGATE_MAINT_ACK`）で実用的に抑止し、全 start 試行を
+  hook-events.log に env snapshot + ppid + isatty 結果で監査記録**する。
+  完全な構造保証は**別 PBI に分割**することを明示（pbi-input In scope /
+  AC-5 / plan Constraints と整合）
 - one-shot の atomicity: EH-3 が consume するタイミングで file を
   delete/move/`consumed_at` 設定 のいずれかで atomically 無効化
 - **Hardening Override（必須採用）**: maintenance 窓内でも以下は常時 block
