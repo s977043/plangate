@@ -688,7 +688,9 @@ try:
     consumed = d.get("consumed_at") is not None
     active = (int(d.get("granted_at", 0)) <= now and rem > 0 and not consumed)
     if active:
-        print(f"active remaining={rem//60:02d}:{rem%60:02d} scope={d.get('scope','')} one_shot={str(one_shot).lower()} paths={d.get('allowed_paths') if d.get('allowed_paths') is not None else '(any non-Override)'}")
+        ap = d.get('allowed_paths')
+        paths_str = ap if ap is not None else '(any non-Override)'
+        print(f"active remaining={rem//60:02d}:{rem%60:02d} scope={d.get('scope','')} one_shot={str(one_shot).lower()} paths={paths_str}")
     elif consumed:
         print(f"consumed (one_shot) — re-issue with 'plangate maintenance start' if needed")
     elif rem == 0:
@@ -1237,7 +1239,7 @@ cmd_maintenance() {
     # $1=event $2=verdict $3=detail (JSON-safe)
     _ev="$1"; _vd="$2"; _dt="$3"
     printf '{"ts":"%s","event":"%s","verdict":"%s","ppid":%s,"isatty_stdin":%s,"detail":%s}\n' \
-      "$(_ts_iso)" "$_ev" "$_vd" "$PPID" \
+      "$(_ts_iso)" "$_ev" "$_vd" "${PPID:-0}" \
       "$([ -t 0 ] && printf true || printf false)" \
       "$(printf '%s' "$_dt" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')" \
       >> "$_hook_events" 2>/dev/null || true
