@@ -104,3 +104,23 @@ R-021..R-026 は本 fixup 内、R-027..R-030 は Gemini の追加発見。
 - **AC-11**: one-shot 消費は flock 取得後の再検証を含む atomic Read-Modify-Write で実装、並行競合時 fail-closed（R-027）
 - **AC-12**: Hardening Override 10 パターンは `target_file` の表記揺れ (`./` 有無等) に関わらず確実に遮断（R-028）
 - **AC-13**: `plangate doctor --json --scope maintenance` で承認窓のメタデータが取得可能（R-030）
+
+## C-2 v3.1 再委任結果（2026-05-20 / Gemini, #304 自動レビュー）
+
+v3.1 fixup commit dd5c4ba に対する gemini-code-assist の auto-review。
+flock + os.replace の atomicity に関する技術的に正当な指摘 1 件（重複 2 thread）。
+
+| ID | Lane | Severity | 内容 | reflected_in | status |
+|----|------|----------|------|--------------|--------|
+| R-031 | コードベース | **high** | flock は fd/inode ベースのため、ロック中に `os.replace` で新 inode に置換されると古い fd の検知が無効化される。**ロック後にパスを再オープン**するか `fstat` vs `stat(path)` で inode 不変を確認してから書込 | _本コミット_ | reflected |
+
+### 技術背景
+
+`os.replace(tmp, target)` は内部で `rename(2)` を呼び、新ファイル（新 inode）を
+target path に置換する。古い target は inode が dangling になる。`flock` は
+fd（inode）に紐づくため、A プロセスが古い inode を flock 中に B プロセスが
+`os.replace` すると、A の flock は意味を失い B の置換は通過する。
+
+**対策**: A は flock 後にパスを再オープンするか、`fstat(fd).st_ino == stat(path).st_ino`
+を確認することで「自分が flock した inode が依然として target path を指す」
+ことを保証してから書込を実行する。

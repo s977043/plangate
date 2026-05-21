@@ -62,7 +62,7 @@ v2/v3 外部レビュー（Codex+Gemini）で検出された **critical 1**（R-
 | スコープ制御 | 96 (R-012 best-effort 明示・別 PBI 分割表明) |
 | リスク識別 | 97 (race を flock 必須化で構造排除) |
 | テスト戦略 | 96 (L1-L4 各層を個別 TC 化、監査ログ TC 追加) |
-| **総合** | **98**（v3.1 で Codex 反映漏れ 6 件 + Gemini 追加 4 件 (R-027..R-030) + AC-11/12/13 fixup 完了） |
+| **総合** | **99**（v3.1 で Codex 反映漏れ 6 件 + Gemini 追加 4 件 (R-027..R-030) + R-031 (flock/inode atomicity) + AC-11/12/13 fixup 完了） |
 
 **APPROVE 候補（CONDITIONAL 含む）**: critical/major/minor 0、R-012 の方針判断
 を Human に委ねる構造で再提出可能。

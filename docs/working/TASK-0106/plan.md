@@ -25,7 +25,7 @@
 
 ## Approach Overview
 
-`schemas/maintenance.schema.json` を **additive 拡張**（`allowed_paths`/`one_shot`/`consumed_at` を optional 追加、既存フィールド変更なし、`additionalProperties:false` 維持）。`bin/plangate maintenance start|stop` で `docs/working/_maintenance/maintenance.json` を生成/削除（start は **対話 TTY 要求**、`--force` で上書き許可）。EH-3 hook では **判定順序**: (i) Hardening Override 判定（maintenance 判定より**物理的に上の行**・R-020/R-028）→ (ii) maintenance ファイル有無・TTL check → (iii) **`fcntl.flock(LOCK_EX | LOCK_NB)` 即座取得**（hook ブロッキング回避・R-027）→ (iv) **ロック取得後に再 read** で `consumed_at` 未消費を再確認（Read-Modify-Write 完全 atomic 化）→ (v) python3 `os.replace(tmp, target)` で atomic 書込 → (vi) ロック解放。**ロック失敗 or 再 read で消費済み判定は fail-closed (block)**。`target_file` は判定前に `./` 除去等で正規化（R-028）。`bin/plangate doctor` に表示行 + `--json` 構造化出力（`scripts/doctor_check.py` 経由）（R-006）。
+`schemas/maintenance.schema.json` を **additive 拡張**（`allowed_paths`/`one_shot`/`consumed_at` を optional 追加、既存フィールド変更なし、`additionalProperties:false` 維持）。`bin/plangate maintenance start|stop` で `docs/working/_maintenance/maintenance.json` を生成/削除（start は **対話 TTY 要求**、`--force` で上書き許可）。EH-3 hook では **判定順序**: (i) Hardening Override 判定（maintenance 判定より**物理的に上の行**・R-020/R-028）→ (ii) maintenance ファイル有無・TTL check → (iii) **`fcntl.flock(LOCK_EX | LOCK_NB)` 即座取得**（hook ブロッキング回避・R-027）→ (iv) **ロック取得後にパスを再オープン**して再 read（または `fstat` と `stat(path)` で inode 不変を確認）で `consumed_at` 未消費を再確認（`os.replace` は新 inode を作るため fd ベースの flock では他者の置換を検知不能・**path 再オープン or inode 確認必須**・R-031）→ (v) python3 `os.replace(tmp, target)` で atomic 書込 → (vi) ロック解放。**ロック失敗 or 再 read で消費済み判定は fail-closed (block)**。`target_file` は判定前に `./` 除去等で正規化（R-028）。`bin/plangate doctor` に表示行 + `--json` 構造化出力（`scripts/doctor_check.py` 経由）（R-006）。
 
 ## Work Breakdown
 
@@ -76,6 +76,7 @@
 | Hardening Override と後方互換の衝突 | **major** | 既存 30 分窓「任意 path PASS」は **Override 対象パス以外**に限定する旨を明文化（R-004） |
 | 新設フィールド読出での寛容な抽出による bypass | **major** | strict JSON 抽出パターン (#282/TASK-0105) を新設 `allowed_paths`/`one_shot`/`consumed_at` 読出にも適用（R-009） |
 | **flock の Read-Modify-Write race** | **major** | flock 取得**前**に読んだ「未消費」を信じると race が崩壊。**ロック後の再 read 検証**を必須化、競合 fail-closed（R-027） |
+| **`os.replace` による inode 入れ替えと flock の整合** | **major** | `os.replace` は新 inode を作るため fd ベース flock で他者の置換を検知不能。**ロック後にパスを再オープンするか `fstat` vs `stat(path)` で inode 不変を確認**してから書込（R-031） |
 | Hardening Override の表記揺れ bypass | **major** | `target_file` が `./` 付き・絶対・相対で来る可能性 → 判定前に正規化 + `*/path|path` glob（R-028） |
 | macOS BSD ps と Linux GNU ps の差異 | minor | L3 parent heuristic で `ps -p $PPID -o comm=` のフルパス返却対応 → `grep -iqE 'claude|codex|cursor'` 部分一致（R-029） |
 
